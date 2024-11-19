@@ -22,7 +22,13 @@ The back propagation optimises this in a way that always reduces the loss functi
 
 //work in progress
 
-$$ dl = $$
+$$ \begin{equation}
+ dl =
+   \left\{\begin{array}{lr}
+       f_1(x), & -\infty < x \le a_1 \\
+       f_2(x), & a_1 < x \le a_2 
+    \end{array}\right.
+ \end{equation}$$
 
 "Mlbp3.py" is the complete neural network, it takes in:
 
@@ -33,6 +39,8 @@ $$ dl = $$
 "yactualout.txt" file which contains all the desired outputs for all datasets pasted together in the same file in the same order as the inputs.
 
 "weights.txt" is an optional file which contains all of the weights of the neural network in an order such that in the image above weights are ordered going down in a particular layer then shifting to the top of the next layer. This is optional because I have made available an option of randomly generating the weights.
+
+"Nweights.txt" is the file that the new trained weights go into.
 
 Uses of neural network:
 
