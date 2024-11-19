@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import sys
 
 def sigmoid(x): # Function needs to be before code to be recognised in Python.
     return 1/(1+np.exp(-x))
@@ -37,24 +38,26 @@ def feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights):
 
     return yarr
 
+############################################################# Start of program:
 
-print("Input number of nodes per layer you want in this format: no1no2no3etc...")
-nodelayersetup = input()
-print("Input the filename containing the yinputs: ")
-yinname = input()
+with open("mlpstruct.txt", "r") as filest: # This code reads in the number of nodes for a particular layer of the neural network.
+    f_list = [int(i) for line in filest for i in line.split(' ') if i.strip()]
+    nodestruct = f_list
 
-layers = len(nodelayersetup)  # Finds total number of layers in the specified multilayered perceptron (MLP).
-nodestruct = np.zeros(layers) # Creates an array with the purpose of containing the number of nodes per layer.
+filest.close()
+
+layers = len(nodestruct) # Extracts the number of layers from the length of nodestruct.
+
 elmntsinmlp = 0               # Counter that counts the total number of nodes in MLP.
 mlpweights = 0                # Counts weights of all nodes.
 
-for i in range(layers): # len gives total length of string. Loop, loops through the characters and adds them to elmtsinmlp inorder to get the total length of the weight array for the mlp network specified by user.
-    elmntsinmlp += int(nodelayersetup[i])
-    nodestruct[i] = int(nodelayersetup[i])
+for i in range(layers): # Loop, loops through the characters and adds them to elmtsinmlp inorder to get the total length of the weight array for the mlp network specified by user.
+    elmntsinmlp += nodestruct[i]
     if i != 0: 
         mlpweights += nodestruct[i]*nodestruct[i-1]
-    # print(i) remember that the index of arrays in python starts with index 0.
+    # Remember that the index of arrays in python starts with index 0.
 
+mlpweights = int(mlpweights)
 mlpwarr = np.zeros(int(mlpweights)) # Creates array for containing all the weight connections between 
 
 print("Total number of layers: " + str(layers))
@@ -62,97 +65,110 @@ print("Total number of nodes: " + str(elmntsinmlp))
 print("Total number of weights: " + str(mlpweights))
 print("Node structure of MLP: " + str(nodestruct))
 
+#########################
 
-mlpwarr = np.array([0.4,0.1,0.5,0.2,-0.2,0.8,0.2,-0.9,0.1]) # For example weights system.
-# Forward passing information part:
+print("How many datasets do you want to use? (supply integer)")
+trialstr = input()
+trialnum = int(trialstr)
 
-#yinputs = np.array([0.0,0.0,0.0,1.0,1.0,0.0,1.0,1.0]) # Complete set of inputs.
-#yactualout = np.array([0.0,1.0,1.0,1.0]) # Complete set of actual outputs.
+print("How do you want to use your own weights? (Y or N, if N then the weights will be randomly generated)")
+ans = input()
+######################## Opens and reads weights.
 
+if ans == "Y":
+    with open("weights.txt", "r") as filew: # This code reads in the different float values in from a txt file.
+        f_list = [float(i) for line in filew for i in line.split(' ') if i.strip()]
+        mlpwarr = f_list[0:mlpweights]
 
-yinputs = np.array([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]) # Complete set of inputs.
-yactualout = np.array([1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]) # Complete set of actual outputs.
-#yinputs = np.zeros(100) # Testinggggggggggggggggggggggggggggg
-#yactualout = np.zeros(50) # Testingggggggggggggggggggggggggggggg
+    filew.close()
+elif ans == "N":
+    mlpwarr = np.random.rand(mlpweights)
+else:
+    print("Enter a correct ans input, N or Y")
+    sys.exit(1) # apparently this works
+
+######################### Opens and reads inputs.
+
+with open("yinputs.txt", "r") as file1: # This code reads in the different float values in from a txt file.
+    f_list = [float(i) for line in file1 for i in line.split(' ') if i.strip()]
+    yinputs = f_list[0:int(nodestruct[0])*trialnum]
+
+file1.close()
+
+######################### Opens and reads the desired outputs.
+
+with open("yactualout.txt", "r") as file2: # This code reads in the different float values in from a txt file.
+    f_list = [float(i) for line in file2 for i in line.split(' ') if i.strip()]
+    yactualout = f_list[0:int(nodestruct[-1])*trialnum]
+
+file2.close()
+
+######################### Definitions of some variables and arrays.
+
 
 inputnum = int(nodestruct[0]) # number of inputs
-
-trialnum = int(len(yinputs)/inputnum) # Number of datasets/trials to be forwarded through the network.
-
-yarr = np.zeros(elmntsinmlp) # Array that contains all the information of the output of nodes, including the intial input.
 outputs = int(nodestruct[layers-1]) # number of outputs in final layer.
-deltal = np.zeros(elmntsinmlp) # Array that contains the deltal corresponding to a particular node in a particular layer.
+yarr = np.zeros(elmntsinmlp) # Array that will contain all the information of the output of nodes, including the intial inputs.
+deltal = np.zeros(elmntsinmlp) # Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
+totalloss = 0 # Variable used for calculating the lossfunction value.
 
-totalloss = 0
-#trial = 0 # so I dont have to delete all my code and because I am going to make it go through different trials after completing one.
+######################### Passes all the inputs through the initial weights and prints out the initial values.
 
-for trial in range(trialnum):
+for trial in range(trialnum): # Cycles through the datasets.
     yarr = np.zeros(elmntsinmlp)
 
-    for y in range(inputnum): # Inserts correct inputs corresponding to correct trial
+    for y in range(inputnum): # Cycles through the input values for a particular dataset.
         yinputpos = trial*inputnum + y # Calculates correct position of input in yinputs array.
-        yarrpos = y
+        yarrpos = y # Position of the input in the yarr array.
         yarr[yarrpos] = yinputs[yinputpos]
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
-
     print(yarr)
-#print(yinputs)
-#print(yactualout)
 
-for trial in range(trialnum):
+######################### This the backpropagation training section of the code. 
+
+for trial in range(trialnum): # Cycles through the datasets.
      
     yarr = np.zeros(elmntsinmlp)
 
-    for y in range(inputnum): # Inserts correct inputs corresponding to correct trial
-        yinputpos = trial*inputnum + y # Calculates correct position of input in yinputs array.
+    for y in range(inputnum): # Initializes the yarr
+        yinputpos = trial*inputnum + y
         yarrpos = y
         yarr[yarrpos] = yinputs[yinputpos]
     
 
     print("trial: " + str(trial))
-    #print("mlpwarr: ")
-    #print(mlpwarr)
-    yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
-
+    yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # Passes yarr through untrained network.
     totalloss = 0
-    for ifin in range(outputs): # loops through the final layers nodes.
-        tlsyarrpos = elmntsinmlp-ifin-1
+
+    for ifin in range(outputs): # Calculates the loss by looping through the final layer nodes.
+        tlsyarrpos = elmntsinmlp-ifin-1 # Position of network output working backwards in comparision to forwardfeed node progression.
+        yactpos = (trial+1)*outputs-ifin-1 # Corresponding position of the desired output.
         #print((trial+1)*outputs-ifin-1)
-        totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])
-    #Had a problem that was caused by not subtracting the correct actual output from network value.
-    #This was solved by adding trial to the index of yactualout because the required element is in a place that depends on the trial number.
-    #print("trial: " + str(trial))
-    #print("totalloss: " + str(totalloss))
-    #print("yarr: ")
-    #print(yarr)
-    #print("mlpwarr: ")
-    #print(mlpwarr)
+        totalloss += (yarr[tlsyarrpos] - yactualout[yactpos])*(yarr[tlsyarrpos] - yactualout[yactpos])
 
     dsdw = 0 # Change in the loss function for a change in weight
     lp = 1 # Learning parameter.
 
-    # Here is where the first layer loop is ***********************
-    for ifin in range(outputs): # For if you had multiple outputs.
+    ################ Firstlayer training:
+
+    for ifin in range(outputs): # Cycles through the outputs.
         yacpos = (trial+1)*outputs-ifin-1
         yarrpos = elmntsinmlp-1-ifin
-        #print("ifin: " + str(ifin) + " yacpos: " + str(yacpos) + " yarrpos: " + str(yarrpos))
+
         yval = yarr[yarrpos]
         deltal[yarrpos] = (yval-yactualout[yacpos])*yval*(1-yval) # Assigns deltal to array in spot corresponding to the output node.
 
-    #print(deltal)
-    weightpos = 0
-    for lm1 in range(int(nodestruct[layers-2])):
-        for ifin in range(outputs):
+    weightpos = 0 # The position of the weight in question being altered.
+
+    for lm1 in range(int(nodestruct[layers-2])): # Cycles through penultimate layer.
+        for ifin in range(outputs): # Cycles through output layer
             dpos =  elmntsinmlp-1-ifin
-            yarrpos = elmntsinmlp-outputs-1-lm1
+            yarrpos = elmntsinmlp-outputs-1-lm1 # Cycles through node outputs of penultimate layer
             weightpos += -1
 
-            dsdw = deltal[dpos]*yarr[yarrpos]
-            mlpwarr[weightpos] = mlpwarr[weightpos] - lp*dsdw
+            dsdw = deltal[dpos]*yarr[yarrpos] 
+            mlpwarr[weightpos] = mlpwarr[weightpos] - lp*dsdw # Adjusting the weight.
 
-        #print("lm1: " + str(lm1) + " ifin: " + str(ifin) + " dpos: " + str(dpos) + " yarrpos: " + str(yarrpos) + " weightpos: " + str(weightpos) + " dsdw: " + str(dsdw)) 
-
-#print(mlpwarr)
 
     ####################################### For all other layers:
     istart = -int(nodestruct[layers-1])
@@ -170,7 +186,7 @@ for trial in range(trialnum):
             # Cycles through different dl values adds the ones from different nodes in the previous layer.
             deltapoint2 = -1+istart-dl
             for di in range(int(nodestruct[layers-1-L])): # Cycles through nodes in previous layer
-                mlpwpoint = weightstart2 -dl-1-di*int(nodestruct[layers-2-L]) # The -1 may mess with calculations
+                mlpwpoint = weightstart2 -dl*int(nodestruct[layers-1-L])-1-di # I changed di*int(nodestruct[layers-2-L]) to dl*int(nodestruct[layers-1-L]) because the weight numbers that we are moving between are adjacent from how the 
                 deltapoint = -dlstrt-di-1
                 deltal[deltapoint2] += mlpwarr[mlpwpoint]*deltal[deltapoint]
                  
@@ -181,8 +197,7 @@ for trial in range(trialnum):
         # Applies new dl values and calculates the dsdw values.
         for nodej in range(int(nodestruct[layers-3-L])): # For if you had multiple outputs.
 
-            for dl in range(int(nodestruct[layers-2-L])): # Adds weighted dl's in previous layer to make new ones
-                # Cycles through different dl values adds the ones from different nodes in the previous layer.
+            for dl in range(int(nodestruct[layers-2-L])):
 
                 weightpoint = weightstart - dl - nodej*int(nodestruct[layers-2-L]) - 1
                 yarrpoint = jstart - nodej - 1
@@ -194,24 +209,15 @@ for trial in range(trialnum):
         weightstart2 += -int(nodestruct[L-1]*nodestruct[L-2])
         istart += -int(nodestruct[layers-L-2])
 
+    ########################### Calculating the new outputs and loss from the altered weights. 
 
-    #print("mlpwarr: ")
-    #print(mlpwarr)
-
-    yarr = np.zeros(elmntsinmlp)
-
+    yarr = np.zeros(elmntsinmlp) # Re initializes yarr.
     for y in range(inputnum): # Inserts correct inputs corresponding to correct trial
         yinputpos = trial*inputnum + y # Calculates correct position of input in yinputs array.
         yarrpos = y
         yarr[yarrpos] = yinputs[yinputpos]
 
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
-
-    #print("yarr: ")
-    #print(yarr)
-
-    #print("deltal: ")
-    #print(deltal)
 
     totalloss = 0
     for ifin in range(outputs): # loops through the final layers nodes.
@@ -221,15 +227,10 @@ for trial in range(trialnum):
         print(yarr[tlsyarrpos])
         print(yactualout[(trial+1)*outputs-ifin-1])
         totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])
-        #Had a problem that was caused by not subtracting the correct actual output from network value.
-        #This was solved by adding trial to the index of yactualout because the required element is in a place that depends on the trial number.
 
-    print("totalloss after training: " + str(totalloss))
-    print("yarr: ")
-    print(yarr)
-    print("mlpwarr: ")
-    print(mlpwarr)
+    print("totalloss after training: " + str(totalloss)) # Prints out the new loss.
 
+############################ Passes all the data sets throught the final trained network.
 
 for trial in range(trialnum): # Passes the inputs through the final trained network.
     yarr = np.zeros(elmntsinmlp)
@@ -242,3 +243,13 @@ for trial in range(trialnum): # Passes the inputs through the final trained netw
     
     print(trial)
     print(yarr)
+
+print(mlpwarr)
+
+# Puts the new weights into a file called Nweights.txt with the same format as the original weights.txt file so that you can re use the new weights for more training or to save them if you have a finished product.
+filenw = open("Nweights.txt","w")
+
+for weight in range(mlpweights):
+    filenw.write(str(mlpwarr[weight]) + " ")
+
+filenw.close()
