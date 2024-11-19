@@ -19,6 +19,7 @@ Loss function being used is the summed squared loss function, it bascially quant
 $$ lossfunction = \sum_{j=0}^{totalnodesinfinallayer}(youtput-ydesired)^{2} $$
 
 The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent.
+
 //work in progress
 
 $$ dl = $$
