@@ -19,7 +19,17 @@ Loss function being used is the summed squared loss function, it bascially quant
 $$ lossfunction = \sum_{j=0}^{totalnodesinfinallayer}(youtput-ydesired)^{2} $$
 
 The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent.
+//work in progress
 
 $$ dl = $$
 
+"Mlbp3.py" is the complete neural network, it takes in:
+"mlpstruct.txt" file which contains the structure of the neural network in the format - a b c d.. where a b c d are integers of the number of nodes in a layer.
+"yinputs.txt" file which contains all the inputs for all datasets pasted together.
+"yactualout.txt" file which contains all the desired outputs for all datasets pasted together in the same file in the same order as the inputs.
+"weights.txt" is an optional file which contains all of the weights of the neural network in an order such that in the image above weights are ordered going down in a particular layer then shifting to the top of the next layer. This is optional because I have made available an option of randomly generating the weights.
+
+Uses of neural network:
+
+What I hope to achieve:
 
