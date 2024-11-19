@@ -16,7 +16,7 @@ $$sig(x) = \frac{1}{1+e^{-x}}$$
 Back propagation is the name of the technique being used to train the neural network:
 Loss function being used is the summed squared loss function, it bascially quantifies the difference between the desired output and the output calculated from passing a set of inputs through your current network.
 
-$$ lossfunction = (youtput-ydesired)^{2} $$
+$$ lossfunction = \sum_{j=0}^{totalnodesinfinallayer}(youtput-ydesired)^{2} $$
 
 The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent.
 
