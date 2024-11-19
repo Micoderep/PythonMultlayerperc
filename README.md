@@ -5,4 +5,12 @@ Hi for this project I am going to code a multi-layer perceptron using python for
 
 The movement forward is calculated as:
 
-$$y = sig(x)$$
+$$y = sig(\sum(wx))$$
+
+Where "sig" is short for sigma an activation function that is defined as:
+
+$$sig(x) = e^{-x}$$
+
+Back propagation is the name of the technique being used to train the neural network:
+
+
