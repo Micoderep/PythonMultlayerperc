@@ -170,7 +170,7 @@ for trial in range(trialnum):
             # Cycles through different dl values adds the ones from different nodes in the previous layer.
             deltapoint2 = -1+istart-dl
             for di in range(int(nodestruct[layers-1-L])): # Cycles through nodes in previous layer
-                mlpwpoint = weightstart2 -dl-1-di*int(nodestruct[layers-2-L]) # The -1 may mess with calculations
+                mlpwpoint = weightstart2 -dl*int(nodestruct[layers-1-L])-1-di # The -1 may mess with calculations
                 deltapoint = -dlstrt-di-1
                 deltal[deltapoint2] += mlpwarr[mlpwpoint]*deltal[deltapoint]
                  
