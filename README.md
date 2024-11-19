@@ -5,7 +5,7 @@ Hi for this project I am going to code a multi-layer perceptron using python for
 
 The movement forward is calculated as:
 
-$$y = sig(\sum{nodes in layer j}{j=0}(w_{ij}x_{j}))$$
+$$y = sig(\sum_{j=0}^{nodes in layer j}(w_{ij}x_{j}))$$
 Where x is the output of a node from a layer and w is the weight corresponding to a connection of that node with a node in the adjacent layer, the equation is summing the product of the output of all nodes in a prior layer with their corresponding weight to one node in the next layer. Say in the image above that we are trying to find the input of the top node in the central layer, we multiply the outputs of the left nodes with the weights which are represented by lines to the top central node.
 
 Where "sig" is short for sigmoid an activation function that is defined as:
