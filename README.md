@@ -5,7 +5,7 @@ Hi for this project I am going to code a multi-layer perceptron using Python for
 
 The movement forward is calculated as:
 
-$$y = sig(\sum_{j=1}^{TNLj}(w_{ij}x_{j}))$$
+$$y = sig(\sum_{j=1}^{TNLj}(w_{ij}x_{j}))   (1)$$
 
 Where $x_{j}$ is the output of a node from a layer and $w_{ij}$ is the weight corresponding to a connection of that node (j) with a node in the adjacent layer (i), the equation is summing the product of the output of all nodes in a prior layer with their corresponding weight to one node in the next layer. Say in the image above that we are trying to find the input of the top node in the central layer, we multiply the outputs of the left nodes with the weights which are represented by lines to the top central node.
 
@@ -21,7 +21,7 @@ The sigmoid function is used to provide a smooth differential function that quic
 Back propagation is the name of the technique being used to train the neural network:
 Loss function being used is the summed squared loss function, it bascially quantifies the difference between the desired output and the output calculated from passing a set of inputs through your current network.
 
-$$ lossfunction = \sum_{j=1}^{TNFL}(youtput-ydesired)^{2} $$
+$$ lossfunction = \sum_{j=1}^{TNFL}(youtput-ydesired)^{2}   (1)$$
 
 The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent.
 
@@ -30,6 +30,8 @@ The back propagation optimises this in a way that always reduces the loss functi
 $$ dl = (youtput - ydesired)youtput(1-youtput) $$
 
 $$ dl = \sum_{l=1}^{TNLl}(w_{il}dl_{l})youtput(1-youtput) $$
+
+Equation
 
 "Mlbp3.py" is the complete neural network, it takes in:
 
