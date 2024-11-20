@@ -5,13 +5,13 @@ Hi for this project I am going to code a multi-layer perceptron using Python for
 
 The movement forward is calculated as:
 
-\begin{equation}$$y = sig(\sum_{j=1}^{TNLj}(w_{ij}x_{j}))$$\end{equation}
+$$y = sig(\sum_{j=1}^{TNLj}(w_{ij}o_{j}))$$
 
-Where $x_{j}$ is the output of a node from a layer and $w_{ij}$ is the weight corresponding to a connection of that node (j) with a node in the adjacent layer (i), the equation is summing the product of the output of all nodes in a prior layer with their corresponding weight to one node in the next layer. Say in the image above that we are trying to find the input of the top node in the central layer, we multiply the outputs of the left nodes with the weights which are represented by lines to the top central node.
+Where $o_{j}$ is the output of a node from a layer and $w_{ij}$ is the weight corresponding to a connection of that node (j) with a node in the adjacent layer (i), the equation is summing the product of the output of all nodes in a prior layer with their corresponding weight to one node in the next layer. Say in the image above that we are trying to find the input of the top node in the central layer, we multiply the outputs of the left nodes with the weights which are represented by lines to the top central node. (TNLj is the total nodes in layer j)
 
 Where "sig" is short for sigmoid an activation function that is defined as:
 
-$$sig(x) = \frac{1}{1+e^{-x}}$$
+$$sig(o) = \frac{1}{1+e^{-o}}$$
 
 ![Logistic-curve](https://github.com/user-attachments/assets/b8a898fc-db02-456e-8a20-67abd3664682)
 (The image was found on this website: https://en.wikipedia.org/wiki/Sigmoid_function)
@@ -21,17 +21,19 @@ The sigmoid function is used to provide a smooth differential function that quic
 Back propagation is the name of the technique being used to train the neural network:
 Loss function being used is the summed squared loss function, it bascially quantifies the difference between the desired output and the output calculated from passing a set of inputs through your current network.
 
-$$ lossfunction = \sum_{j=1}^{TNFL}(youtput-ydesired)^{2}$$
+$$ lossfunction = \sum_{j=1}^{TNFL}(o_{l}-ydesired_{l})^{2}$$
 
-The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent.
+The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent. Gradient descent represented by this equation:
 
-//work in progress
+$$ wnew_{ij} = w_{ij} - lp*o_{j}dl_{i} $$
 
-$$ dl = (youtput - ydesired)youtput(1-youtput) $$
+Where $wnew$ is the altered weight, $w$ is the original weight, $lp$ is called the learning parameter, $o_{i}$ is the output of the $j^{th}$ node in the $j^{th}$ layer, dl is just the symbol given to a collection of values put together as described by the equations below inorder that when multiplied by the correct output it adjusts the weight such that it reduces the loss function, bringing the network closer to producing the desired output for that set of inputs.
 
-$$ dl = \sum_{l=1}^{TNLl}(w_{il}dl_{l})youtput(1-youtput) $$
+$$ dl_{l} = (o_{l} - ydesired_{l})o_{l}(1-o_{l}) $$
 
-Equation
+$$ dl_{i} = \sum_{l=1}^{TNLl}(w_{il}dl_{l})o_{i}(1-o_{i}) $$
+
+In the two equations above the first is the dl calculated for altering the set of weights connecting the penultimate layer to the final layer, subsequent weights are altered using the second equation putting together the previous dl values created.
 
 "Mlbp3.py" is the complete neural network, it takes in:
 
