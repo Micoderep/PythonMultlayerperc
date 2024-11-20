@@ -14,7 +14,9 @@ Where "sig" is short for sigmoid an activation function that is defined as:
 $$sig(x) = \frac{1}{1+e^{-x}}$$
 
 ![Logistic-curve](https://github.com/user-attachments/assets/b8a898fc-db02-456e-8a20-67abd3664682)
+(The image was found on this website: https://en.wikipedia.org/wiki/Sigmoid_function)
 
+The sigmoid function is used to provide a smooth differential function that quickly moves between the values 0 and 1 which mimicks the on or offness of neural networks. The differential aspect is necessary because for the back propagation algorithm to work the function must be differential. The activation function thus does not have to be a sigmoid function, other functions including ReLU are discussed here: https://www.v7labs.com/blog/neural-networks-activation-functions)
 
 Back propagation is the name of the technique being used to train the neural network:
 Loss function being used is the summed squared loss function, it bascially quantifies the difference between the desired output and the output calculated from passing a set of inputs through your current network.
