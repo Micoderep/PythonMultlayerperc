@@ -23,7 +23,7 @@ The sigmoid function is used to provide a smooth differential function that quic
 Back propagation is the name of the technique being used to train the neural network:
 Loss function being used is the summed squared loss function, it bascially quantifies the difference between the desired output and the output calculated from passing a set of inputs through your current network.
 
-$$ lossfunction = \sum_{j=1}^{TNFL}(o_{l}-ydesired_{l})^{2}$$
+$$ lossfunction = \sum_{l=1}^{TNFL}(o_{l}-ydesired_{l})^{2}$$
 
 The back propagation optimises this in a way that always reduces the loss function via a method known as gradient descent. Gradient descent represented by this equation:
 
