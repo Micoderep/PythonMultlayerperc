@@ -1,6 +1,7 @@
 Hi for this project I am going to code a multi-layer perceptron using Python for fun.
 
 ![image](https://github.com/user-attachments/assets/810ad0f7-bf43-40ea-93b9-08fa712e75ef)
+
 (The image was found on this website: https://medium.com/codex/introduction-to-how-an-multilayer-perceptron-works-but-without-complicated-math-a423979897ac)
 
 The movement forward is calculated as:
@@ -14,6 +15,7 @@ Where "sig" is short for sigmoid an activation function that is defined as:
 $$sig(o) = \frac{1}{1+e^{-o}}$$
 
 ![Logistic-curve](https://github.com/user-attachments/assets/b8a898fc-db02-456e-8a20-67abd3664682)
+
 (The image was found on this website: https://en.wikipedia.org/wiki/Sigmoid_function)
 
 The sigmoid function is used to provide a smooth differential function that quickly moves between the values 0 and 1 which mimicks the on or offness of neural networks. The differential aspect is necessary because for the back propagation algorithm to work the function must be differential. The activation function thus does not have to be a sigmoid function, other functions including ReLU are discussed here: https://www.v7labs.com/blog/neural-networks-activation-functions)
