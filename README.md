@@ -22,13 +22,9 @@ The back propagation optimises this in a way that always reduces the loss functi
 
 //work in progress
 
-$$ \begin{equation}
- dl =
-   \left\{\begin{array}{lr}
-       f_1(x), & -\infty < x \le a_1 \\
-       f_2(x), & a_1 < x \le a_2 
-    \end{array}\right.
- \end{equation}$$
+$$ dl = (youtput - ydesired)youtput(1-youtput) $$
+
+$$ dl = \sum_{}^{}()youtput(1-youtput) $$
 
 "Mlbp3.py" is the complete neural network, it takes in:
 
