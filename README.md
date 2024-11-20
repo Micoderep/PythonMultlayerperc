@@ -29,7 +29,7 @@ The back propagation optimises this in a way that always reduces the loss functi
 
 $$ wnew_{ij} = w_{ij} - lp*o_{j}dl_{i} $$
 
-Where $wnew$ is the altered weight, $w$ is the original weight, $lp$ is called the learning parameter, $o_{i}$ is the output of the $j^{th}$ node in the $j^{th}$ layer, dl is just the symbol given to a collection of values put together as described by the equations below inorder that when multiplied by the correct output it adjusts the weight such that it reduces the loss function, bringing the network closer to producing the desired output for that set of inputs.
+Where $wnew$ is the altered weight, $w$ is the original weight, $lp$ is called the learning parameter, $o_{j}$ is the output of the $j^{th}$ node in the $j^{th}$ layer, dl is just the symbol given to a collection of values put together as described by the equations below inorder that when multiplied by the correct output it adjusts the weight such that it reduces the loss function, bringing the network closer to producing the desired output for that set of inputs.
 
 $$ dl_{l} = (o_{l} - ydesired_{l})o_{l}(1-o_{l}) $$
 
