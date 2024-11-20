@@ -5,7 +5,7 @@ Hi for this project I am going to code a multi-layer perceptron using Python for
 
 The movement forward is calculated as:
 
-$$\begin{equation} y = sig(\sum_{j=1}^{TNLj}(w_{ij}x_{j})) \end{equation}$$
+\begin{equation}$$y = sig(\sum_{j=1}^{TNLj}(w_{ij}x_{j}))$$\end{equation}
 
 Where $x_{j}$ is the output of a node from a layer and $w_{ij}$ is the weight corresponding to a connection of that node (j) with a node in the adjacent layer (i), the equation is summing the product of the output of all nodes in a prior layer with their corresponding weight to one node in the next layer. Say in the image above that we are trying to find the input of the top node in the central layer, we multiply the outputs of the left nodes with the weights which are represented by lines to the top central node.
 
