@@ -122,7 +122,14 @@ for trial in range(trialnum): # Cycles through the datasets.
         yarrpos = y # Position of the input in the yarr array.
         yarr[yarrpos] = yinputs[yinputpos]
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
-    print(yarr)
+
+    totalloss = 0
+    for ifin in range(outputs): # loops through the final layers nodes.
+
+        tlsyarrpos = elmntsinmlp-ifin-1
+        totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])
+
+    print("totalloss before training: " + str(totalloss)) # Prints out the new loss.
 
 ######################### This the backpropagation training section of the code. 
 
@@ -135,8 +142,6 @@ for trial in range(trialnum): # Cycles through the datasets.
         yarrpos = y
         yarr[yarrpos] = yinputs[yinputpos]
     
-
-    print("trial: " + str(trial))
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # Passes yarr through untrained network.
     totalloss = 0
 
@@ -171,6 +176,7 @@ for trial in range(trialnum): # Cycles through the datasets.
 
 
     ####################################### For all other layers:
+
     istart = -int(nodestruct[layers-1])
     dlstrt = 0
     jstart = -int(nodestruct[layers-1])
@@ -180,7 +186,9 @@ for trial in range(trialnum): # Cycles through the datasets.
     for L in range(layers-2): #-2 as the first iteration has already been done above and there are no weights before the first layer.
         weightstart += -int(nodestruct[L-1]*nodestruct[L-2])
         jstart += -int(nodestruct[layers-L-2])
+
         ###############################
+
         # Calculates the new dl values from layer change
         for dl in range(int(nodestruct[layers-2-L])): # Adds weighted dl's in previous layer to make new ones
             # Cycles through different dl values adds the ones from different nodes in the previous layer.
@@ -194,6 +202,7 @@ for trial in range(trialnum): # Cycles through the datasets.
             deltal[deltapoint2] = deltal[deltapoint2]*yarr[deltapoint2]*(1-yarr[deltapoint2]) 
 
         #############################
+
         # Applies new dl values and calculates the dsdw values.
         for nodej in range(int(nodestruct[layers-3-L])): # For if you had multiple outputs.
 
@@ -223,9 +232,6 @@ for trial in range(trialnum): # Cycles through the datasets.
     for ifin in range(outputs): # loops through the final layers nodes.
 
         tlsyarrpos = elmntsinmlp-ifin-1
-        print((trial+1)*outputs-ifin-1)
-        print(yarr[tlsyarrpos])
-        print(yactualout[(trial+1)*outputs-ifin-1])
         totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])
 
     print("totalloss after training: " + str(totalloss)) # Prints out the new loss.
@@ -241,9 +247,8 @@ for trial in range(trialnum): # Passes the inputs through the final trained netw
         yarr[yarrpos] = yinputs[yinputpos]
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
     
-    print(trial)
-    print(yarr)
 
+print("Final weights: ")
 print(mlpwarr)
 
 # Puts the new weights into a file called Nweights.txt with the same format as the original weights.txt file so that you can re use the new weights for more training or to save them if you have a finished product.
