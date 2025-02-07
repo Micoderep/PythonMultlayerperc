@@ -50,10 +50,13 @@ In the two equations above the first is the dl calculated for altering the set o
 "Nweights.txt" is the file that the new trained weights go into.
 
 Tests:
+
 dafpy is a folder where I convert the jpeg image "daff1.jpeg" to a row in a txt file using the code in jpegtotxt.py file, the image is also standardized to the size 2048x2048 using the numpy.pad function (this transformation loses the colour information but this is a test of the progress so far). Then the data is used to train the neural network.
 
 Uses of neural network:
-I am training it to recognise daffodils from other flowers.
+
+Image recognition, and image generation.
 
 What I hope to achieve:
+
 To build fast general neural network software.
