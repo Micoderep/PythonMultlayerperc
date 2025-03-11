@@ -76,7 +76,7 @@ ans = input()
 ######################## Opens and reads weights.
 
 if ans == "Y":
-    with open("weights.txt", "r") as filew: # This code reads in the different float values in from a txt file.
+    with open("file.txt", "r") as filew: # This code reads in the different float values in from a txt file.
         f_list = [float(i) for line in filew for i in line.split(' ') if i.strip()]
         mlpwarr = f_list[0:mlpweights]
 
@@ -122,7 +122,8 @@ for trial in range(trialnum): # Cycles through the datasets.
         yarrpos = y # Position of the input in the yarr array.
         yarr[yarrpos] = yinputs[yinputpos]
     yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights) # output corresponding to particular input.
-
+    print(yarr)
+    print(trial)
     totalloss = 0
     for ifin in range(outputs): # loops through the final layers nodes.
 
@@ -174,7 +175,7 @@ for trial in range(trialnum): # Cycles through the datasets.
             dsdw = deltal[dpos]*yarr[yarrpos] 
             mlpwarr[weightpos] = mlpwarr[weightpos] - lp*dsdw # Adjusting the weight.
 
-
+    print(yarr)
     ####################################### For all other layers:
 
     istart = -int(nodestruct[layers-1])
