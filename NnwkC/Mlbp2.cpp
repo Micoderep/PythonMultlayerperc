@@ -5,9 +5,29 @@
 #include <sstream>
 #include <random>
 #include <memory>
+#include <string>
 
 double sigmoid(double x){ 
 	return 1/(1+exp(-x));
+}
+
+void fileextract(std::string filename, std::unique_ptr<std::vector<double>>& array, int loops){
+        
+        double dvalue;
+	std::ifstream file; file.open(filename);
+        
+	if ( file.is_open() ) { // Always check whether the file is open
+
+		//while (file.good()){
+		for(int num = 0; num <= loops; ++num){
+			file >> dvalue;
+			array->push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+		}
+
+                array->pop_back(); 
+        }
+
+	file.close();
 }
 
 class rng{
@@ -62,17 +82,12 @@ void feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::
 
 int main(int argc, char **argv){
 	
-	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
         std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
         std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
 	//std::vector<int> nodestruct; // Creates a vector to contain the number of nodes per layer.
 	//std::vector<double> mlpwarr;
         int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
         double dvalue;
-//	int inputnum = nodestruct[0], outputs = nodestruct[layers-1], yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
-//	double totalloss, lp = 1, dsdw, yval;
-  //  std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
-    //    int weightstart, weightstart2, istart, jstart, dlstrt, deltapoint, deltapoint2, yarrpoint, weightpoint, mlpwpoint;
         rng random; // Makes an rng object.
 
 	std::string yon;
@@ -85,7 +100,8 @@ int main(int argc, char **argv){
 	std::cin >> yon;
 
 ///////////////////////////////////////////////////////////////////////////////////
-	
+
+	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
 	if ( mlpstruct.is_open() ) { // Always check whether the file is open
 		while (mlpstruct.good()){
 			mlpstruct >> value;
@@ -97,6 +113,7 @@ int main(int argc, char **argv){
         nodestruct->pop_back(); // Corrects the repetitive value at the end of the vector.
 	layers = nodestruct->size(); // Number of layers in the neural network.
 	
+	std::cout << "layers: " << layers << std::endl;
 ///////////////////////////////////////////////////////////////////////////////////
         mlpweights = 0;
 
@@ -107,8 +124,6 @@ int main(int argc, char **argv){
 		}
         } 
 
-	std::cout << "mlpweights: " << mlpweights << std::endl;
-
 /////////////////////////////////////////////////////////////////////////////////// 
 
 	if (yon == "R"){
@@ -116,73 +131,42 @@ int main(int argc, char **argv){
 
 		for(int num = 0; num < mlpweights; ++num){
 			mlpwarr->push_back(random.grnd());
-//		        std::cout << mlpwarr[num] << std::endl;
 	        }
 
 	} else if (yon == "P"){
-        std::ifstream weights; weights.open("fil3.txt");
 
-	if ( weights.is_open() ) { // Always check whether the file is open
-		while (weights.good()){
-			weights >> dvalue;
-			mlpwarr->push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-		}
-	}
+        fileextract("fil3.txt", mlpwarr, mlpweights);
 
-	weights.close();
-        mlpwarr->pop_back(); 
-	mlpweights = mlpwarr->size();
-        
 	} else{
 		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
 		exit(0);
 	}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 	std::unique_ptr<std::vector<double>> yarr = std::make_unique<std::vector<double>>(elmntsinmlp);
-        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>(((*nodestruct)[0])*trialnum);   
-        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>(((*nodestruct)[layers-1])*trialnum);   
-	//yarr(elmntsinmlp), yinputs(((*nodestruct)[0])*trialnum), yactualout(((*nodestruct)[layers-1])*trialnum); // Because we know the total number of nodes in the neural network we can now initialize the yarr vector which will contain all the inputs/outputs provided to and calculated by the network. 
+        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>();
+        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>();   
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-	std::ifstream yinputsf; yinputsf.open("yinputs.txt");
+        fileextract("yinputs.txt", yinputs, ((*nodestruct)[0])*trialnum); // yinput and yactualout pointer being allocated the file data.
 
-	if ( yinputsf.is_open() ) { // Always check whether the file is open
+        fileextract("yactualout.txt", yactualout, ((*nodestruct)[layers-1])*trialnum);
+        
+	if (yinputs->size() == ((*nodestruct)[0])*trialnum && yactualout->size() == ((*nodestruct)[layers-1])*trialnum){
 
-		for(int i = 0; i < ((*nodestruct)[0])*trialnum; ++i){
-			yinputsf >> dvalue;
-			(*yinputs)[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-			//std::cout << yinputs[i] << std::endl;
-		}
+	} else{
+		std::cout << "inputs or outputs size does not match with number of trials or nodestructure." << std::endl;
+		exit(0);
 
-        }
-
-	yinputsf.close();
-
-////////////////////////////////////////////////////////////////////////////////////
-
-        for(int num = 0; num < elmntsinmlp; ++num){
-		(*yarr)[num] = 0.0;
 	}
 
-	std::ifstream yactualoutf; yactualoutf.open("yactualout.txt");
-        
-	if ( yactualoutf.is_open() ) { // Always check whether the file is open
-
-		for(int i = 0; i < ((*nodestruct)[layers-1])*trialnum; ++i){
-			yactualoutf >> dvalue;
-			(*yactualout)[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-			//std::cout << yactualout[i] << std::endl;
-		}
-
-        }
-
-	yactualoutf.close();
+//////////////////////////////////////////////////////////////////////////////////
 
 	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]), yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
 	double totalloss, lp = 1, dsdw, yval;
-    std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
+        std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
         int weightstart, weightstart2, istart, jstart, dlstrt, deltapoint, deltapoint2, yarrpoint, weightpoint, mlpwpoint;
 ////////////////////////// Passes all the inputs through the initial weights and prints out the initial values.
 
@@ -261,7 +245,7 @@ int main(int argc, char **argv){
 		}
 
 //////////////////////////////////////////////////////////// For all other layers:
-    istart = -(*nodestruct)[layers-1];
+        istart = -(*nodestruct)[layers-1];
 	dlstrt = elmntsinmlp;
 	jstart = -(*nodestruct)[layers-1];
 	weightstart = mlpweights;
