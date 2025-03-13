@@ -26,7 +26,7 @@ class rng{
                         }
 };
 
-std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::vector<double> yarr, std::vector<double> mlpwarr, int elmntsinmlp, int mlpweights){
+std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::vector<double> yarr, std::unique_ptr<std::vector<double>>& mlpwarr, int elmntsinmlp, int mlpweights){
 	int presweight = 0; // Keeps track of which weight is to be used in forward passing.
 	int yarrposi = 0; // Keeps track of position of new set of input nodes.
 	int yarrposj = 0; // Keeps track of position of old set of input nodes.
@@ -42,7 +42,7 @@ std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& no
 				
 				for(int i = 0; i < irange; ++i){ // Cycles through the nodes of present layer, will be using to cycle through weights.
 					int yipos = yarrposi + i;
-					yarr[yipos] += mlpwarr[presweight]*yarr[yjpos];
+					yarr[yipos] += ((*mlpwarr)[presweight])*yarr[yjpos];
 					
 					presweight += 1; // Keeps incrementing the weight index.
 				}
@@ -65,8 +65,9 @@ int main(int argc, char **argv){
 	
 	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
         std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
+        std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
 	//std::vector<int> nodestruct; // Creates a vector to contain the number of nodes per layer.
-	std::vector<double> mlpwarr;
+	//std::vector<double> mlpwarr;
         int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
         double dvalue;
 //	int inputnum = nodestruct[0], outputs = nodestruct[layers-1], yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
@@ -115,7 +116,7 @@ int main(int argc, char **argv){
 		random.seed(1);
 
 		for(int num = 0; num < mlpweights; ++num){
-			mlpwarr.push_back(random.grnd());
+			mlpwarr->push_back(random.grnd());
 //		        std::cout << mlpwarr[num] << std::endl;
 	        }
 
@@ -125,13 +126,13 @@ int main(int argc, char **argv){
 	if ( weights.is_open() ) { // Always check whether the file is open
 		while (weights.good()){
 			weights >> dvalue;
-			mlpwarr.push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+			mlpwarr->push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
 		}
 	}
 
 	weights.close();
-        mlpwarr.pop_back(); 
-	mlpweights = mlpwarr.size();
+        mlpwarr->pop_back(); 
+	mlpweights = mlpwarr->size();
         
 	} else{
 		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
@@ -253,7 +254,7 @@ int main(int argc, char **argv){
 				weightpos += -1;
 				
 				dsdw = deltal[dpos]*yarr[yarrpos];
-				mlpwarr[weightpos] = mlpwarr[weightpos] - lp*dsdw; // Adjusting the weight.
+				(*mlpwarr)[weightpos] = (*mlpwarr)[weightpos] - lp*dsdw; // Adjusting the weight.
                         }
 		}
 
@@ -276,7 +277,7 @@ int main(int argc, char **argv){
 		        for(int di = 0; di < (*nodestruct)[layers-1-L]; ++di){ // Cycles through nodes in previous layer
 		        mlpwpoint = weightstart2 -dl*((*nodestruct)[layers-1-L])-1-di; // I changed di*int(nodestruct[layers-2-L]) to dl*int(nodestruct[layers-1-L]) because the weight numbers that we are moving between are adjacent from how the 
 		        deltapoint = dlstrt-di-1;
-				deltal[deltapoint2] += mlpwarr[mlpwpoint]*deltal[deltapoint];
+				deltal[deltapoint2] += ((*mlpwarr)[mlpwpoint])*deltal[deltapoint];
 				
 //				if (deltapoint2 < 5){
 //					std::cout << "mlpwarr: " << mlpwarr[mlpwpoint] << " mlpwpoint: " << mlpwpoint << " deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " di: " << di << " dl: " << dl << " deltapoint2: " << deltapoint2 << std::endl;
@@ -300,7 +301,7 @@ int main(int argc, char **argv){
                             yarrpoint = elmntsinmlp+jstart - nodej - 1;
                             deltapoint = elmntsinmlp+istart - dl - 1;
                             dsdw = deltal[deltapoint]*yarr[yarrpoint];
-                            mlpwarr[weightpoint] = mlpwarr[weightpoint] - (dsdw*lp);
+                            (*mlpwarr)[weightpoint] = (*mlpwarr)[weightpoint] - (dsdw*lp);
                             
                                                     
                             //std::cout << "deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " dl: " << dl << " trial: " << trial << std::endl;			    
@@ -335,13 +336,13 @@ int main(int argc, char **argv){
         }
         
         for(int num = 0; num < mlpweights; ++num){
-		std::cout << "mlpwarr: " << mlpwarr[num] << std::endl;
+		std::cout << "mlpwarr: " << (*mlpwarr)[num] << std::endl;
 	}
 
 	std::ofstream Nweights("Nweights.txt");
 
         for(int num = 0; num < elmntsinmlp; ++num){
-	        Nweights << mlpwarr[num] << " ";	
+	        Nweights << (*mlpwarr)[num] << " ";	
 	}
 	std::cout << deltal[0] << " " << deltal[1] << std::endl;
 
