@@ -26,7 +26,7 @@ class rng{
                         }
 };
 
-std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::vector<double> yarr, std::unique_ptr<std::vector<double>>& mlpwarr, int elmntsinmlp, int mlpweights){
+void feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, int elmntsinmlp, int mlpweights){
 	int presweight = 0; // Keeps track of which weight is to be used in forward passing.
 	int yarrposi = 0; // Keeps track of position of new set of input nodes.
 	int yarrposj = 0; // Keeps track of position of old set of input nodes.
@@ -42,7 +42,7 @@ std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& no
 				
 				for(int i = 0; i < irange; ++i){ // Cycles through the nodes of present layer, will be using to cycle through weights.
 					int yipos = yarrposi + i;
-					yarr[yipos] += ((*mlpwarr)[presweight])*yarr[yjpos];
+					(*yarr)[yipos] += ((*mlpwarr)[presweight])*((*yarr)[yjpos]);
 					
 					presweight += 1; // Keeps incrementing the weight index.
 				}
@@ -51,13 +51,12 @@ std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& no
 			
 			for(int i = 0; i < irange; ++i){ // Applies sigmoid function to the sum of the inputs for new output.
 				int yipos = yarrposi + i;
-				yarr[yipos] = sigmoid(yarr[yipos]);
+				(*yarr)[yipos] = sigmoid((*yarr)[yipos]);
 			}
 
 			yarrposj += jrange;        // Updates positon of old nodes.
 
         }
-	return yarr;
 }
 
 
@@ -140,7 +139,10 @@ int main(int argc, char **argv){
 	}
 ///////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<double> yarr(elmntsinmlp), yinputs(((*nodestruct)[0])*trialnum), yactualout(((*nodestruct)[layers-1])*trialnum); // Because we know the total number of nodes in the neural network we can now initialize the yarr vector which will contain all the inputs/outputs provided to and calculated by the network. 
+	std::unique_ptr<std::vector<double>> yarr = std::make_unique<std::vector<double>>(elmntsinmlp);
+        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>(((*nodestruct)[0])*trialnum);   
+        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>(((*nodestruct)[layers-1])*trialnum);   
+	//yarr(elmntsinmlp), yinputs(((*nodestruct)[0])*trialnum), yactualout(((*nodestruct)[layers-1])*trialnum); // Because we know the total number of nodes in the neural network we can now initialize the yarr vector which will contain all the inputs/outputs provided to and calculated by the network. 
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -150,7 +152,7 @@ int main(int argc, char **argv){
 
 		for(int i = 0; i < ((*nodestruct)[0])*trialnum; ++i){
 			yinputsf >> dvalue;
-			yinputs[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+			(*yinputs)[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
 			//std::cout << yinputs[i] << std::endl;
 		}
 
@@ -161,7 +163,7 @@ int main(int argc, char **argv){
 ////////////////////////////////////////////////////////////////////////////////////
 
         for(int num = 0; num < elmntsinmlp; ++num){
-		yarr[num] = 0.0;
+		(*yarr)[num] = 0.0;
 	}
 
 	std::ifstream yactualoutf; yactualoutf.open("yactualout.txt");
@@ -170,7 +172,7 @@ int main(int argc, char **argv){
 
 		for(int i = 0; i < ((*nodestruct)[layers-1])*trialnum; ++i){
 			yactualoutf >> dvalue;
-			yactualout[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+			(*yactualout)[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
 			//std::cout << yactualout[i] << std::endl;
 		}
 
@@ -187,22 +189,22 @@ int main(int argc, char **argv){
 	for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
 
 		for(int num = 0; num < elmntsinmlp; ++num){
-			yarr[num] = 0.0;
+			(*yarr)[num] = 0.0;
 		}
                 
 		for(int y = 0; y < inputnum; ++y){ // Cycles through the input values for a particular dataset.
 			yinputpos = trial*inputnum + y; // Calculates correct position of input in yinputs array.
 			yarrpos = y; // Position of the input in the yarr array.
-			yarr[yarrpos] = yinputs[yinputpos];
+			(*yarr)[yarrpos] = (*yinputs)[yinputpos];
 		}
 
-		yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
+		feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
 		
 		totalloss = 0;
 		for(int ifin = 0; ifin < outputs; ++ifin){ // loops through the final layers nodes.
 			
 			tlsyarrpos = elmntsinmlp-ifin-1;
-			totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1]);
+			totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
 	                //std::cout << "totalloss: " << totalloss << std::endl;
 	        }
         }
@@ -212,23 +214,23 @@ int main(int argc, char **argv){
         for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
      
 		for(int num = 0; num < elmntsinmlp; ++num){
-			yarr[num] = 0.0;
+			(*yarr)[num] = 0.0;
 			deltal[num] = 0.0;
 		}
 		
 		for(int y = 0; y < inputnum; ++y){ // Initializes the yarr
 			yinputpos = trial*inputnum + y;
 			yarrpos = y;
-			yarr[yarrpos] = yinputs[yinputpos];
+			(*yarr)[yarrpos] = (*yinputs)[yinputpos];
                 } 
 		
-		yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // Passes yarr through untrained network.
+		feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // Passes yarr through untrained network.
 		totalloss = 0;
                 
 		for(int ifin = 0; ifin < outputs; ++ifin){ // Calculates the loss by looping through the final layer nodes.
 			tlsyarrpos = elmntsinmlp-ifin-1; // Position of network output working backwards in comparision to forwardfeed node progression.
 			yactpos = (trial+1)*outputs-ifin-1; // Corresponding position of the desired output.
-			totalloss += (yarr[tlsyarrpos] - yactualout[yactpos])*(yarr[tlsyarrpos] - yactualout[yactpos]);
+			totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[yactpos])*((*yarr)[tlsyarrpos] - (*yactualout)[yactpos]);
                 }
 		
 		dsdw = 0; // Change in the loss function for a change in weight
@@ -239,8 +241,8 @@ int main(int argc, char **argv){
 			    yacpos = (trial+1)*outputs-ifin-1;
                 yarrpos = elmntsinmlp-1-ifin;
 			
-			    yval = yarr[yarrpos];
-			    deltal[yarrpos] = (yval-yactualout[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
+			    yval = (*yarr)[yarrpos];
+			    deltal[yarrpos] = (yval-(*yactualout)[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
 			    //std::cout << yval << " " << yactualout[yacpos] << " " << deltal[yarrpos] << std::endl;
         }
 		
@@ -253,7 +255,7 @@ int main(int argc, char **argv){
 				
 				weightpos += -1;
 				
-				dsdw = deltal[dpos]*yarr[yarrpos];
+				dsdw = deltal[dpos]*(*yarr)[yarrpos];
 				(*mlpwarr)[weightpos] = (*mlpwarr)[weightpos] - lp*dsdw; // Adjusting the weight.
                         }
 		}
@@ -285,7 +287,7 @@ int main(int argc, char **argv){
 				//std::cout << "dlstrt: " << dlstrt << " dpoint: " << deltapoint << " dpoint2: " << deltapoint2 << " mlpwpoint: " << mlpwpoint << " mlpwarr: " << mlpwarr[mlpwpoint] << " dlval: " << deltal[deltapoint] << " ws: " << weightstart << " ws2: " << weightstart2 << " trial: " << trial << " L: " << L <<std::endl;
                         }                 
                         
-			deltal[deltapoint2] = deltal[deltapoint2]*yarr[deltapoint2]*(1-yarr[deltapoint2]);
+			deltal[deltapoint2] = deltal[deltapoint2]*((*yarr)[deltapoint2])*(1-(*yarr)[deltapoint2]);
 		}	
 			//	for(int num = 0; num < elmntsinmlp; ++num){
 			//	    std::cout << deltal[num] << " " << trial << std::endl;
@@ -300,7 +302,7 @@ int main(int argc, char **argv){
                             weightpoint = weightstart - dl - nodej*((*nodestruct)[layers-2-L]) - 1;
                             yarrpoint = elmntsinmlp+jstart - nodej - 1;
                             deltapoint = elmntsinmlp+istart - dl - 1;
-                            dsdw = deltal[deltapoint]*yarr[yarrpoint];
+                            dsdw = deltal[deltapoint]*((*yarr)[yarrpoint]);
                             (*mlpwarr)[weightpoint] = (*mlpwarr)[weightpoint] - (dsdw*lp);
                             
                                                     
@@ -317,20 +319,20 @@ int main(int argc, char **argv){
 
         
 	for(int num = 0; num < elmntsinmlp; ++num){
-		yarr[num] = 0.0;
+		(*yarr)[num] = 0.0;
 	}
     
 	for(int y = 0; y < inputnum; ++y){ // Inserts correct inputs corresponding to correct trial
 		yinputpos = trial*inputnum + y; // Calculates correct position of input in yinputs array.
                 yarrpos = y;
-                yarr[yarrpos] = yinputs[yinputpos];
+                (*yarr)[yarrpos] = (*yinputs)[yinputpos];
         }
-        yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
+        feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
 
         totalloss = 0;
         for(int ifin = 0; ifin < outputs; ++ifin){ // loops through the final layers nodes.
 		tlsyarrpos = elmntsinmlp-ifin-1;
-		totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1]);
+		totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
 
 	}
         }
@@ -352,7 +354,7 @@ int main(int argc, char **argv){
 		std::cout << "deltal: " << deltal[num] << std::endl;
 	}
     for(int num = 0; num < elmntsinmlp; ++num){
-		std::cout << "yarr: " << yarr[num] << std::endl;
+		std::cout << "yarr: " << (*yarr)[num] << std::endl;
 	}
 	return 0;
 }
