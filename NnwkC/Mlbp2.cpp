@@ -5,9 +5,29 @@
 #include <sstream>
 #include <random>
 #include <memory>
+#include <string>
 
 double sigmoid(double x){ 
 	return 1/(1+exp(-x));
+}
+
+void fileextract(std::string filename, std::unique_ptr<std::vector<double>>& array, int loops){
+        
+        double dvalue;
+	std::ifstream file; file.open(filename);
+        
+	if ( file.is_open() ) { // Always check whether the file is open
+
+		//while (file.good()){
+		for(int num = 0; num <= loops; ++num){
+			file >> dvalue;
+			array->push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+		}
+
+                array->pop_back(); 
+        }
+
+	file.close();
 }
 
 class rng{
@@ -26,7 +46,7 @@ class rng{
                         }
 };
 
-std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::vector<double> yarr, std::vector<double> mlpwarr, int elmntsinmlp, int mlpweights){
+void feedforward(int layers,std::unique_ptr<std::vector<int>>& nodestruct, std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, int elmntsinmlp, int mlpweights){
 	int presweight = 0; // Keeps track of which weight is to be used in forward passing.
 	int yarrposi = 0; // Keeps track of position of new set of input nodes.
 	int yarrposj = 0; // Keeps track of position of old set of input nodes.
@@ -42,7 +62,7 @@ std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& no
 				
 				for(int i = 0; i < irange; ++i){ // Cycles through the nodes of present layer, will be using to cycle through weights.
 					int yipos = yarrposi + i;
-					yarr[yipos] += mlpwarr[presweight]*yarr[yjpos];
+					(*yarr)[yipos] += ((*mlpwarr)[presweight])*((*yarr)[yjpos]);
 					
 					presweight += 1; // Keeps incrementing the weight index.
 				}
@@ -51,28 +71,23 @@ std::vector<double> feedforward(int layers,std::unique_ptr<std::vector<int>>& no
 			
 			for(int i = 0; i < irange; ++i){ // Applies sigmoid function to the sum of the inputs for new output.
 				int yipos = yarrposi + i;
-				yarr[yipos] = sigmoid(yarr[yipos]);
+				(*yarr)[yipos] = sigmoid((*yarr)[yipos]);
 			}
 
 			yarrposj += jrange;        // Updates positon of old nodes.
 
         }
-	return yarr;
 }
 
 
 int main(int argc, char **argv){
 	
-	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
         std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
+        std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
 	//std::vector<int> nodestruct; // Creates a vector to contain the number of nodes per layer.
-	std::vector<double> mlpwarr;
+	//std::vector<double> mlpwarr;
         int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
         double dvalue;
-//	int inputnum = nodestruct[0], outputs = nodestruct[layers-1], yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
-//	double totalloss, lp = 1, dsdw, yval;
-  //  std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
-    //    int weightstart, weightstart2, istart, jstart, dlstrt, deltapoint, deltapoint2, yarrpoint, weightpoint, mlpwpoint;
         rng random; // Makes an rng object.
 
 	std::string yon;
@@ -85,7 +100,8 @@ int main(int argc, char **argv){
 	std::cin >> yon;
 
 ///////////////////////////////////////////////////////////////////////////////////
-	
+
+	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
 	if ( mlpstruct.is_open() ) { // Always check whether the file is open
 		while (mlpstruct.good()){
 			mlpstruct >> value;
@@ -97,6 +113,7 @@ int main(int argc, char **argv){
         nodestruct->pop_back(); // Corrects the repetitive value at the end of the vector.
 	layers = nodestruct->size(); // Number of layers in the neural network.
 	
+	std::cout << "layers: " << layers << std::endl;
 ///////////////////////////////////////////////////////////////////////////////////
         mlpweights = 0;
 
@@ -107,101 +124,71 @@ int main(int argc, char **argv){
 		}
         } 
 
-	std::cout << "mlpweights: " << mlpweights << std::endl;
-
 /////////////////////////////////////////////////////////////////////////////////// 
 
 	if (yon == "R"){
 		random.seed(1);
 
 		for(int num = 0; num < mlpweights; ++num){
-			mlpwarr.push_back(random.grnd());
-//		        std::cout << mlpwarr[num] << std::endl;
+			mlpwarr->push_back(random.grnd());
 	        }
 
 	} else if (yon == "P"){
-        std::ifstream weights; weights.open("fil3.txt");
 
-	if ( weights.is_open() ) { // Always check whether the file is open
-		while (weights.good()){
-			weights >> dvalue;
-			mlpwarr.push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-		}
-	}
+        fileextract("fil3.txt", mlpwarr, mlpweights);
 
-	weights.close();
-        mlpwarr.pop_back(); 
-	mlpweights = mlpwarr.size();
-        
 	} else{
 		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
 		exit(0);
 	}
-///////////////////////////////////////////////////////////////////////////////////
-
-	std::vector<double> yarr(elmntsinmlp), yinputs(((*nodestruct)[0])*trialnum), yactualout(((*nodestruct)[layers-1])*trialnum); // Because we know the total number of nodes in the neural network we can now initialize the yarr vector which will contain all the inputs/outputs provided to and calculated by the network. 
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-	std::ifstream yinputsf; yinputsf.open("yinputs.txt");
+	std::unique_ptr<std::vector<double>> yarr = std::make_unique<std::vector<double>>(elmntsinmlp);
+        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>();
+        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>();   
 
-	if ( yinputsf.is_open() ) { // Always check whether the file is open
+///////////////////////////////////////////////////////////////////////////////////
 
-		for(int i = 0; i < ((*nodestruct)[0])*trialnum; ++i){
-			yinputsf >> dvalue;
-			yinputs[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-			//std::cout << yinputs[i] << std::endl;
-		}
+        fileextract("yinputs.txt", yinputs, ((*nodestruct)[0])*trialnum); // yinput and yactualout pointer being allocated the file data.
 
-        }
+        fileextract("yactualout.txt", yactualout, ((*nodestruct)[layers-1])*trialnum);
+        
+	if (yinputs->size() == ((*nodestruct)[0])*trialnum && yactualout->size() == ((*nodestruct)[layers-1])*trialnum){
 
-	yinputsf.close();
+	} else{
+		std::cout << "inputs or outputs size does not match with number of trials or nodestructure." << std::endl;
+		exit(0);
 
-////////////////////////////////////////////////////////////////////////////////////
-
-        for(int num = 0; num < elmntsinmlp; ++num){
-		yarr[num] = 0.0;
 	}
 
-	std::ifstream yactualoutf; yactualoutf.open("yactualout.txt");
-        
-	if ( yactualoutf.is_open() ) { // Always check whether the file is open
-
-		for(int i = 0; i < ((*nodestruct)[layers-1])*trialnum; ++i){
-			yactualoutf >> dvalue;
-			yactualout[i] = dvalue; // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-			//std::cout << yactualout[i] << std::endl;
-		}
-
-        }
-
-	yactualoutf.close();
+//////////////////////////////////////////////////////////////////////////////////
 
 	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]), yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
 	double totalloss, lp = 1, dsdw, yval;
-    std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
+        std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
         int weightstart, weightstart2, istart, jstart, dlstrt, deltapoint, deltapoint2, yarrpoint, weightpoint, mlpwpoint;
 ////////////////////////// Passes all the inputs through the initial weights and prints out the initial values.
 
 	for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
 
 		for(int num = 0; num < elmntsinmlp; ++num){
-			yarr[num] = 0.0;
+			(*yarr)[num] = 0.0;
 		}
                 
 		for(int y = 0; y < inputnum; ++y){ // Cycles through the input values for a particular dataset.
 			yinputpos = trial*inputnum + y; // Calculates correct position of input in yinputs array.
 			yarrpos = y; // Position of the input in the yarr array.
-			yarr[yarrpos] = yinputs[yinputpos];
+			(*yarr)[yarrpos] = (*yinputs)[yinputpos];
 		}
 
-		yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
+		feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
 		
 		totalloss = 0;
 		for(int ifin = 0; ifin < outputs; ++ifin){ // loops through the final layers nodes.
 			
 			tlsyarrpos = elmntsinmlp-ifin-1;
-			totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1]);
+			totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
 	                //std::cout << "totalloss: " << totalloss << std::endl;
 	        }
         }
@@ -211,23 +198,23 @@ int main(int argc, char **argv){
         for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
      
 		for(int num = 0; num < elmntsinmlp; ++num){
-			yarr[num] = 0.0;
+			(*yarr)[num] = 0.0;
 			deltal[num] = 0.0;
 		}
 		
 		for(int y = 0; y < inputnum; ++y){ // Initializes the yarr
 			yinputpos = trial*inputnum + y;
 			yarrpos = y;
-			yarr[yarrpos] = yinputs[yinputpos];
+			(*yarr)[yarrpos] = (*yinputs)[yinputpos];
                 } 
 		
-		yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // Passes yarr through untrained network.
+		feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // Passes yarr through untrained network.
 		totalloss = 0;
                 
 		for(int ifin = 0; ifin < outputs; ++ifin){ // Calculates the loss by looping through the final layer nodes.
 			tlsyarrpos = elmntsinmlp-ifin-1; // Position of network output working backwards in comparision to forwardfeed node progression.
 			yactpos = (trial+1)*outputs-ifin-1; // Corresponding position of the desired output.
-			totalloss += (yarr[tlsyarrpos] - yactualout[yactpos])*(yarr[tlsyarrpos] - yactualout[yactpos]);
+			totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[yactpos])*((*yarr)[tlsyarrpos] - (*yactualout)[yactpos]);
                 }
 		
 		dsdw = 0; // Change in the loss function for a change in weight
@@ -238,8 +225,8 @@ int main(int argc, char **argv){
 			    yacpos = (trial+1)*outputs-ifin-1;
                 yarrpos = elmntsinmlp-1-ifin;
 			
-			    yval = yarr[yarrpos];
-			    deltal[yarrpos] = (yval-yactualout[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
+			    yval = (*yarr)[yarrpos];
+			    deltal[yarrpos] = (yval-(*yactualout)[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
 			    //std::cout << yval << " " << yactualout[yacpos] << " " << deltal[yarrpos] << std::endl;
         }
 		
@@ -252,13 +239,13 @@ int main(int argc, char **argv){
 				
 				weightpos += -1;
 				
-				dsdw = deltal[dpos]*yarr[yarrpos];
-				mlpwarr[weightpos] = mlpwarr[weightpos] - lp*dsdw; // Adjusting the weight.
+				dsdw = deltal[dpos]*(*yarr)[yarrpos];
+				(*mlpwarr)[weightpos] = (*mlpwarr)[weightpos] - lp*dsdw; // Adjusting the weight.
                         }
 		}
 
 //////////////////////////////////////////////////////////// For all other layers:
-    istart = -(*nodestruct)[layers-1];
+        istart = -(*nodestruct)[layers-1];
 	dlstrt = elmntsinmlp;
 	jstart = -(*nodestruct)[layers-1];
 	weightstart = mlpweights;
@@ -276,7 +263,7 @@ int main(int argc, char **argv){
 		        for(int di = 0; di < (*nodestruct)[layers-1-L]; ++di){ // Cycles through nodes in previous layer
 		        mlpwpoint = weightstart2 -dl*((*nodestruct)[layers-1-L])-1-di; // I changed di*int(nodestruct[layers-2-L]) to dl*int(nodestruct[layers-1-L]) because the weight numbers that we are moving between are adjacent from how the 
 		        deltapoint = dlstrt-di-1;
-				deltal[deltapoint2] += mlpwarr[mlpwpoint]*deltal[deltapoint];
+				deltal[deltapoint2] += ((*mlpwarr)[mlpwpoint])*deltal[deltapoint];
 				
 //				if (deltapoint2 < 5){
 //					std::cout << "mlpwarr: " << mlpwarr[mlpwpoint] << " mlpwpoint: " << mlpwpoint << " deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " di: " << di << " dl: " << dl << " deltapoint2: " << deltapoint2 << std::endl;
@@ -284,7 +271,7 @@ int main(int argc, char **argv){
 				//std::cout << "dlstrt: " << dlstrt << " dpoint: " << deltapoint << " dpoint2: " << deltapoint2 << " mlpwpoint: " << mlpwpoint << " mlpwarr: " << mlpwarr[mlpwpoint] << " dlval: " << deltal[deltapoint] << " ws: " << weightstart << " ws2: " << weightstart2 << " trial: " << trial << " L: " << L <<std::endl;
                         }                 
                         
-			deltal[deltapoint2] = deltal[deltapoint2]*yarr[deltapoint2]*(1-yarr[deltapoint2]);
+			deltal[deltapoint2] = deltal[deltapoint2]*((*yarr)[deltapoint2])*(1-(*yarr)[deltapoint2]);
 		}	
 			//	for(int num = 0; num < elmntsinmlp; ++num){
 			//	    std::cout << deltal[num] << " " << trial << std::endl;
@@ -299,8 +286,8 @@ int main(int argc, char **argv){
                             weightpoint = weightstart - dl - nodej*((*nodestruct)[layers-2-L]) - 1;
                             yarrpoint = elmntsinmlp+jstart - nodej - 1;
                             deltapoint = elmntsinmlp+istart - dl - 1;
-                            dsdw = deltal[deltapoint]*yarr[yarrpoint];
-                            mlpwarr[weightpoint] = mlpwarr[weightpoint] - (dsdw*lp);
+                            dsdw = deltal[deltapoint]*((*yarr)[yarrpoint]);
+                            (*mlpwarr)[weightpoint] = (*mlpwarr)[weightpoint] - (dsdw*lp);
                             
                                                     
                             //std::cout << "deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " dl: " << dl << " trial: " << trial << std::endl;			    
@@ -316,32 +303,32 @@ int main(int argc, char **argv){
 
         
 	for(int num = 0; num < elmntsinmlp; ++num){
-		yarr[num] = 0.0;
+		(*yarr)[num] = 0.0;
 	}
     
 	for(int y = 0; y < inputnum; ++y){ // Inserts correct inputs corresponding to correct trial
 		yinputpos = trial*inputnum + y; // Calculates correct position of input in yinputs array.
                 yarrpos = y;
-                yarr[yarrpos] = yinputs[yinputpos];
+                (*yarr)[yarrpos] = (*yinputs)[yinputpos];
         }
-        yarr = feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
+        feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
 
         totalloss = 0;
         for(int ifin = 0; ifin < outputs; ++ifin){ // loops through the final layers nodes.
 		tlsyarrpos = elmntsinmlp-ifin-1;
-		totalloss += (yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1])*(yarr[tlsyarrpos] - yactualout[(trial+1)*outputs-ifin-1]);
+		totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
 
 	}
         }
         
         for(int num = 0; num < mlpweights; ++num){
-		std::cout << "mlpwarr: " << mlpwarr[num] << std::endl;
+		std::cout << "mlpwarr: " << (*mlpwarr)[num] << std::endl;
 	}
 
 	std::ofstream Nweights("Nweights.txt");
 
         for(int num = 0; num < elmntsinmlp; ++num){
-	        Nweights << mlpwarr[num] << " ";	
+	        Nweights << (*mlpwarr)[num] << " ";	
 	}
 	std::cout << deltal[0] << " " << deltal[1] << std::endl;
 
@@ -351,7 +338,7 @@ int main(int argc, char **argv){
 		std::cout << "deltal: " << deltal[num] << std::endl;
 	}
     for(int num = 0; num < elmntsinmlp; ++num){
-		std::cout << "yarr: " << yarr[num] << std::endl;
+		std::cout << "yarr: " << (*yarr)[num] << std::endl;
 	}
 	return 0;
 }
