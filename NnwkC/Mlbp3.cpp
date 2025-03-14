@@ -86,7 +86,8 @@ class AI{
 
 	public:
 
-		void pass1(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trial, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){ // remember that totalloss needs to eventually become a pointer!
+		void pass1(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trial, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){ 
+			
 			int yinputpos, yarrpos, tlsyarrpos;
 
 		for(int num = 0; num < elmntsinmlp; ++num){
@@ -106,124 +107,18 @@ class AI{
 			
 			tlsyarrpos = elmntsinmlp-ifin-1;
 			*totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
-	                //std::cout << "totalloss: " << totalloss << std::endl;
 	        }
-        
-
-
-
-
 		}
-};
 
-int main(int argc, char **argv){
-	
-        std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
-        std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
-	//std::vector<int> nodestruct; // Creates a vector to contain the number of nodes per layer.
-	//std::vector<double> mlpwarr;
-        int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
-        double dvalue;
-        rng random; // Makes an rng object.
-        AI ai;
-
-	std::string yon;
-
-	std::cout << "How many datasets from the available data do you want to train the neural network on?" << std::endl;
-	std::cin >> trialnum;
-
-	std::cout << "Do you want to use random weights or pre-existing ones? (R or P)" << std::endl;
-
-	std::cin >> yon;
-
-///////////////////////////////////////////////////////////////////////////////////
-
-	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
-	if ( mlpstruct.is_open() ) { // Always check whether the file is open
-		while (mlpstruct.good()){
-			mlpstruct >> value;
-			nodestruct->push_back(value); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
-		}
-	}
-        mlpstruct.close(); 
-
-        nodestruct->pop_back(); // Corrects the repetitive value at the end of the vector.
-	layers = nodestruct->size(); // Number of layers in the neural network.
-	
-	std::cout << "layers: " << layers << std::endl;
-///////////////////////////////////////////////////////////////////////////////////
-        mlpweights = 0;
-
-        for(int num = 0; num < layers; ++num){ // Calculates the total number of nodes in the neural network.
-		elmntsinmlp = elmntsinmlp + (*nodestruct)[num];
-                if (num != 0){
-			mlpweights += ((*nodestruct)[num])*((*nodestruct)[num-1]);
-		}
-        } 
-
-/////////////////////////////////////////////////////////////////////////////////// 
-
-	if (yon == "R"){
-		random.seed(1);
-
-		for(int num = 0; num < mlpweights; ++num){
-			mlpwarr->push_back(random.grnd());
-	        }
-
-	} else if (yon == "P"){
-
-        fileextract("fil3.txt", mlpwarr, mlpweights);
-
-	} else{
-		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
-		exit(0);
-	}
-
-///////////////////////////////////////////////////////////////////////////////////
-
-	std::unique_ptr<std::vector<double>> yarr = std::make_unique<std::vector<double>>(elmntsinmlp);
-        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>();
-        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>();   
-
-///////////////////////////////////////////////////////////////////////////////////
-
-        fileextract("yinputs.txt", yinputs, ((*nodestruct)[0])*trialnum); // yinput and yactualout pointer being allocated the file data.
-
-        fileextract("yactualout.txt", yactualout, ((*nodestruct)[layers-1])*trialnum);
-        
-	if (yinputs->size() == ((*nodestruct)[0])*trialnum && yactualout->size() == ((*nodestruct)[layers-1])*trialnum){
-
-	} else{
-		std::cout << "inputs or outputs size does not match with number of trials or nodestructure." << std::endl;
-		exit(0);
-
-	}
-
-//////////////////////////////////////////////////////////////////////////////////
-
-	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]), yinputpos, yarrpos, tlsyarrpos, yacpos, yactpos, dpos, weightpos;
-	double lp = 1, dsdw, yval;
-	std::unique_ptr<double> totalloss = std::make_unique<double>();
-        std::vector<double> deltal(elmntsinmlp); // Array that contains the deltal corresponding to a particular node, the array contains all deltal values in the node order.
-        int weightstart, weightstart2, istart, jstart, dlstrt, deltapoint, deltapoint2, yarrpoint, weightpoint, mlpwpoint;
-////////////////////////// Passes all the inputs through the initial weights and prints out the initial values.
-
-	for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
-                
-		
-		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
-	        
-//		std::cout << "totalloss: " << *totalloss << std::endl;
-  //              for(int num = 0; num < elmntsinmlp; ++num){
-//			std::cout << "Trial: " << trial << " yarrbefore: " << (*yarr)[num] << std::endl;
-//	        }
-        }
+		void training(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trialnum, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){
 
 
-//////////////////////////////////////////////////// Begin training.
-        for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
-     
-		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+		double dsdw, yval, lp = 1.0;
+		int yacpos, yarrpos, dpos, weightpos, istart, dlstrt, jstart, weightstart, weightstart2, deltapoint, deltapoint2, mlpwpoint, weightpoint, yarrpoint, trial;
+		std::vector<double> deltal(elmntsinmlp);
+
+                for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
+			pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
 		for(int num = 0; num < elmntsinmlp; ++num){
 			deltal[num] = 0.0;
 		}
@@ -234,12 +129,11 @@ int main(int argc, char **argv){
                 
 		for(int ifin = 0; ifin < outputs; ++ifin){ // Cycles through the outputs.
 			    yacpos = (trial+1)*outputs-ifin-1;
-                yarrpos = elmntsinmlp-1-ifin;
+                            yarrpos = elmntsinmlp-1-ifin;
 			
 			    yval = (*yarr)[yarrpos];
 			    deltal[yarrpos] = (yval-(*yactualout)[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
-			    //std::cout << yval << " " << yactualout[yacpos] << " " << deltal[yarrpos] << std::endl;
-        }
+                }
 		
 		weightpos = mlpweights; // The position of the weight in question being altered.
 		
@@ -272,22 +166,14 @@ int main(int argc, char **argv){
                 // Cycles through different dl values adds the ones from different nodes in the previous layer.
 		        deltapoint2 = elmntsinmlp-1+istart-dl;
 		        for(int di = 0; di < (*nodestruct)[layers-1-L]; ++di){ // Cycles through nodes in previous layer
-		        mlpwpoint = weightstart2 -dl*((*nodestruct)[layers-1-L])-1-di; // I changed di*int(nodestruct[layers-2-L]) to dl*int(nodestruct[layers-1-L]) because the weight numbers that we are moving between are adjacent from how the 
-		        deltapoint = dlstrt-di-1;
+				mlpwpoint = weightstart2 -dl*((*nodestruct)[layers-1-L])-1-di; // I changed di*int(nodestruct[layers-2-L]) to dl*int(nodestruct[layers-1-L]) because the weight numbers that we are moving between are adjacent from how the 
+				deltapoint = dlstrt-di-1;
 				deltal[deltapoint2] += ((*mlpwarr)[mlpwpoint])*deltal[deltapoint];
 				
-//				if (deltapoint2 < 5){
-//					std::cout << "mlpwarr: " << mlpwarr[mlpwpoint] << " mlpwpoint: " << mlpwpoint << " deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " di: " << di << " dl: " << dl << " deltapoint2: " << deltapoint2 << std::endl;
-//				}
-				//std::cout << "dlstrt: " << dlstrt << " dpoint: " << deltapoint << " dpoint2: " << deltapoint2 << " mlpwpoint: " << mlpwpoint << " mlpwarr: " << mlpwarr[mlpwpoint] << " dlval: " << deltal[deltapoint] << " ws: " << weightstart << " ws2: " << weightstart2 << " trial: " << trial << " L: " << L <<std::endl;
                         }                 
                         
 			deltal[deltapoint2] = deltal[deltapoint2]*((*yarr)[deltapoint2])*(1-(*yarr)[deltapoint2]);
 		}	
-			//	for(int num = 0; num < elmntsinmlp; ++num){
-			//	    std::cout << deltal[num] << " " << trial << std::endl;
-            // 	}
-
         //////////////////////////////////////////////////////
 
         // Applies new dl values and calculates the dsdw values.
@@ -299,42 +185,136 @@ int main(int argc, char **argv){
                             deltapoint = elmntsinmlp+istart - dl - 1;
                             dsdw = deltal[deltapoint]*((*yarr)[yarrpoint]);
                             (*mlpwarr)[weightpoint] = (*mlpwarr)[weightpoint] - (dsdw*lp);
-                            
                                                     
-                            //std::cout << "deltal: " << deltal[deltapoint] << " deltapoint: " << deltapoint << " dl: " << dl << " trial: " << trial << std::endl;			    
-                            //std::cout << "dlstrt: " << dlstrt << " dpoint: " << deltapoint << " deltal: " << deltal[deltapoint] << " dpoint2: " << deltapoint2 << " mlpwpoint: " << mlpwpoint << " mlpwarr: " << mlpwarr[weightpoint] << " dsdw: " << dsdw << " ws: " << weightstart << " ws2: " << weightstart2 << " yarrpoint: " << yarrpoint << " yarr: " << yarr[yarrpoint] <<" trial: " << trial << std::endl;
-                            //std::cout << "dlstrt: " << dlstrt << " dpoint: " << deltapoint << " dpoint2: " << deltapoint2 << " mlpwpoint: " << mlpwpoint << " ws: " << weightstart << " ws2: " << weightstart2 << " yarrpoint: " << yarrpoint << " trial: " << trial << std::endl;
                         }
 		}
 		dlstrt += -(*nodestruct)[layers-1-L]; // alters the layer at which the dl values are calculated for.
 		weightstart2 += -((*nodestruct)[layers-L-1])*((*nodestruct)[layers-L-2]);
 		istart += -(*nodestruct)[layers-L-2];
 
-        } /////////////////////////////////////////// End of training.
+                }
 
+		}
+		}
+};
+
+int main(int argc, char **argv){
+	
+        std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
+        std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
+        int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
+        rng random; // Makes an rng object.
+        AI ai;
+
+	std::cout << "How many datasets from the available data do you want to train the neural network on?" << std::endl;
+	std::cin >> trialnum;
+
+	std::cout << "Do you want to use random weights or pre-existing ones? (R or P)" << std::endl;
+
+	std::string yon;
+	std::cin >> yon;
+
+///////////////////////////////////////////////////////////////////////////////////
+
+	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
+	if ( mlpstruct.is_open() ) { // Always check whether the file is open
+		while (mlpstruct.good()){
+			mlpstruct >> value;
+			nodestruct->push_back(value); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
+		}
+	}
+        mlpstruct.close(); 
+
+        nodestruct->pop_back(); // Corrects the repetitive value at the end of the vector.
+	layers = nodestruct->size(); // Number of layers in the neural network.
+	
+////////////////////////////////////// Calculating the total number of nodes in the neural network elmntsinmlp, and the total number of weights, mlpweights.
+        mlpweights = 0;
+
+        for(int num = 0; num < layers; ++num){ // Calculates the total number of nodes in the neural network.
+		elmntsinmlp = elmntsinmlp + (*nodestruct)[num];
+                if (num != 0){
+			mlpweights += ((*nodestruct)[num])*((*nodestruct)[num-1]);
+		}
+        } 
+
+///////////////////////////////////////// Code that either calculates random weights or extracts them from a file. 
+
+	if (yon == "R"){
+		random.seed(1);
+
+		for(int num = 0; num < mlpweights; ++num){
+			mlpwarr->push_back(random.grnd());
+	        }
+
+	} else if (yon == "P"){
+
+        fileextract("fil3.txt", mlpwarr, mlpweights);
+
+	} else{
+		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
+		exit(0);
+	}
+
+////////////////////////////////////////// Defines smart pointer vectors which contains all the inputs, outputs, and contemporary node output values.
+
+	std::unique_ptr<std::vector<double>> yarr = std::make_unique<std::vector<double>>(elmntsinmlp);
+        std::unique_ptr<std::vector<double>> yinputs = std::make_unique<std::vector<double>>();
+        std::unique_ptr<std::vector<double>> yactualout = std::make_unique<std::vector<double>>();   
+
+////////////////////////////////////////// Extracts all the inputs and outputs and checks if the number matches up with the nodestruct information.
+
+        fileextract("yinputs.txt", yinputs, ((*nodestruct)[0])*trialnum); // yinput and yactualout pointer being allocated the file data.
+
+        fileextract("yactualout.txt", yactualout, ((*nodestruct)[layers-1])*trialnum);
         
+	if (yinputs->size() == ((*nodestruct)[0])*trialnum && yactualout->size() == ((*nodestruct)[layers-1])*trialnum){
+
+	} else{
+		std::cout << "inputs or outputs size does not match with number of trials or nodestructure." << std::endl;
+		exit(0);
+
+	}
+
+//////////////////////////////////////////////////////////////////////////////////
+
+	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]);
+	std::unique_ptr<double> totalloss = std::make_unique<double>();
+////////////////////////// Passes all the inputs through the initial weights and prints out the initial values.
+
+	for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
+                
+		
+		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+	        
+//		std::cout << "totalloss: " << *totalloss << std::endl;
+  //              for(int num = 0; num < elmntsinmlp; ++num){
+//			std::cout << "Trial: " << trial << " yarrbefore: " << (*yarr)[num] << std::endl;
+//	        }
+        }
+
+
+//////////////////////////////////////////////////// Begin training.
+     
+	ai.training(yarr, mlpwarr, yinputs, yactualout, trialnum, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+        
+	for(int trial = 3; trial < 4; ++trial){
 	ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
-        
 	}
         
         for(int num = 0; num < mlpweights; ++num){
 		std::cout << "mlpwarr: " << (*mlpwarr)[num] << std::endl;
 	}
-
+/////////////////////
 	std::ofstream Nweights("Nweights.txt");
-
         for(int num = 0; num < elmntsinmlp; ++num){
 	        Nweights << (*mlpwarr)[num] << " ";	
 	}
-	std::cout << deltal[0] << " " << deltal[1] << std::endl;
-
         Nweights.close();
-        
-    for(int num = 0; num < elmntsinmlp; ++num){
-		std::cout << "deltal: " << deltal[num] << std::endl;
-	}
-    for(int num = 0; num < elmntsinmlp; ++num){
-	std::cout << "yarr: " << (*yarr)[num] << std::endl;
+////////////////////
+
+        for(int num = 0; num < elmntsinmlp; ++num){
+		std::cout << "yarr: " << (*yarr)[num] << std::endl;
 	}
 	return 0;
 }
