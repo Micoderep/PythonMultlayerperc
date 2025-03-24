@@ -11,15 +11,15 @@ double sigmoid(double x){
 	return 1/(1+exp(-x));
 }
 
-void fileextract(std::string filename, std::unique_ptr<std::vector<double>>& array, int loops){
+void fileextract(std::string filename, std::unique_ptr<std::vector<double>>& array){ // int loops
         
         double dvalue;
 	std::ifstream file; file.open(filename);
         
 	if ( file.is_open() ) { // Always check whether the file is open
 
-		//while (file.good()){
-		for(int num = 0; num <= loops; ++num){
+		while (file.good()){
+		//for(int num = 0; num <= loops; ++num){
 			file >> dvalue;
 			array->push_back(dvalue); // Since nodestruct's size not set it needs values appended to it using the push_back function otherwise there will be a segmentation error.
 		}
@@ -110,7 +110,7 @@ class AI{
 		}
 		
 		// Trains the neural network on all the specified datasets.
-		void training(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trialnum, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){
+		void training(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trialnum1, int trialnum2, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){
 			
 			double dsdw, yval, lp = 1.0;
 			int yacpos, yarrpos, dpos, weightpos, istart, dlstrt, jstart, weightstart, weightstart2, deltapoint, deltapoint2, mlpwpoint, weightpoint, yarrpoint, trial;
@@ -119,7 +119,7 @@ class AI{
 // Start of the training.
 //
 //
-			for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.
+			for(int trial = trialnum1; trial < trialnum2; ++trial){ // Cycles through the datasets.
 				
 				pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
 				
@@ -203,12 +203,16 @@ int main(int argc, char **argv){
 	
         std::unique_ptr<std::vector<int>> nodestruct = std::make_unique<std::vector<int>>();	
         std::unique_ptr<std::vector<double>> mlpwarr = std::make_unique<std::vector<double>>();	
-        int value, layers, elmntsinmlp = 0, mlpweights, trialnum; // value is a variable for a stream value to be put into before being allocated to a vector.
-        rng random; // Makes an rng object.
+        int value, layers, elmntsinmlp = 0, mlpweights; // value is a variable for a stream value to be put into before being allocated to a vector.
+        double fraction;
+	int epochnum;
+	rng random; // Makes an rng object.
         AI ai;
 
-	std::cout << "How many datasets from the available data do you want to train the neural network on?" << std::endl;
-	std::cin >> trialnum;
+	std::cout << "How many data training epochs do you want?" << std::endl;
+	std::cin >> epochnum;
+	std::cout << "What fraction of the data do you want to train the data on? (The other will be testing)" << std::endl;
+	std::cin >> fraction;
 
 	std::cout << "Do you want to use random weights or pre-existing ones? (R or P)" << std::endl;
 
@@ -254,7 +258,7 @@ int main(int argc, char **argv){
 
 	} else if (yon == "P"){
 
-        fileextract("fil3.txt", mlpwarr, mlpweights);
+        fileextract("fil3.txt", mlpwarr);
 
 	} else{
 		std::cout << "Program did not receive an acceptable input (R or P)" << std::endl;
@@ -273,17 +277,21 @@ int main(int argc, char **argv){
 //
 //
 
-        fileextract("yinputs.txt", yinputs, ((*nodestruct)[0])*trialnum);
-        fileextract("yactualout.txt", yactualout, ((*nodestruct)[layers-1])*trialnum);
+        fileextract("yinputs.txt", yinputs); //  ((*nodestruct)[0])*trialnum
+        fileextract("yactualout.txt", yactualout); //  ((*nodestruct)[layers-1])*trialnum
         
-	if (yinputs->size() == ((*nodestruct)[0])*trialnum && yactualout->size() == ((*nodestruct)[layers-1])*trialnum){
+	if ((yinputs->size())%((*nodestruct)[0]) == 0 && (yactualout->size())%((*nodestruct)[layers-1]) == 0){
 
+	} else if((yinputs->size())%((*nodestruct)[0]) != 0){
+		std::cout << "inputs extracted are not a factor of the number of first layer nodes." << std::endl;
+                exit(0);
+	       
 	} else{
 		std::cout << "inputs or outputs size does not match with number of trials or nodestructure." << std::endl;
 		exit(0);
 
 	}
-
+        
 //////////////////////////////////////////////////////////////////////////////////
 
 	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]);
@@ -293,7 +301,7 @@ int main(int argc, char **argv){
 //
 //
 
-	for(int trial = 0; trial < trialnum; ++trial){ // Cycles through the datasets.		
+	for(int trial = 0; trial < 4; ++trial){ // Cycles through the datasets.		
 		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);        
         }
 
@@ -301,16 +309,25 @@ int main(int argc, char **argv){
 // Training.
 //
 //
-     
-	ai.training(yarr, mlpwarr, yinputs, yactualout, trialnum, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
-   
+	int TTritpepoch = round((fraction*(yinputs->size()))/epochnum), TTitpepoch = (yinputs->size())-TTritpepoch*epochnum;
+
+        for(int epoch = 0; epoch < epochnum; ++epoch){
+		std::cout << "epoch: " << epoch << std::endl;
+		int trialnum1 = TTritpepoch*epoch, trialnum2 = TTritpepoch*(epoch+1); 
+		ai.training(yarr, mlpwarr, yinputs, yactualout, trialnum1, trialnum2, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+
+		for(int trial = TTritpepoch*epochnum; trial < yinputs->size(); ++trial){
+			std::cout << "Trial: " << trial << std::endl;
+			ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+		}
+
+	}
 // Calculating out the last iteration of yarr for checking.
 //
 //
-	for(int trial = 3; trial < 4; ++trial){
-	ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+        for(int trial = TTritpepoch*epochnum-1; trial < TTritpepoch*epochnum; ++trial){ // Passes the final training set through the trained NNwk.
+		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
 	}
-   
 // Printing all the final weights and yarr.
 //
 //
