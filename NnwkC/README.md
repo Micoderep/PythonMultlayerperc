@@ -14,5 +14,5 @@ In this folder there are images; synthetic_one, zero, and generated_zero (shown 
 ![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
 ![zero_generated](https://github.com/user-attachments/assets/3182a1b7-c419-41b2-8e5e-1f2698ddaebb)
 
-The middle input image has an unexpectedly high value ~0.7-0.8, I tested by using an input image with a zero with a similar style to the training data and it gave a value much closer to zero ~0.001.
+The middle input image has an unexpectedly high value ~0.7-0.8, I tested by using an input image (right most one) with a zero with a similar style to the training data and it gave a value much closer to zero ~0.001.
 
