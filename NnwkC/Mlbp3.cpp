@@ -102,17 +102,18 @@ class AI{
 			
 			feedforward(layers,nodestruct,yarr,mlpwarr,elmntsinmlp,mlpweights); // output corresponding to particular input.
 			
-			*totalloss = 0;
+//			*totalloss = 0;
 			for(int ifin = 0; ifin < outputs; ++ifin){ // loops through the final layers nodes.
 				tlsyarrpos = elmntsinmlp-ifin-1;
 				*totalloss += ((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1])*((*yarr)[tlsyarrpos] - (*yactualout)[(trial+1)*outputs-ifin-1]);
 			}
+//			std::cout << "totalloss: " << *totalloss << " yactualout: " << (*yactualout)[(trial+1)*outputs-1] << " yarr: " << (*yarr)[elmntsinmlp-1] << std::endl;
 		}
 		
 		// Trains the neural network on all the specified datasets.
 		void training(std::unique_ptr<std::vector<double>>& yarr, std::unique_ptr<std::vector<double>>& mlpwarr, std::unique_ptr<std::vector<double>>& yinputs, std::unique_ptr<std::vector<double>>& yactualout, int trialnum1, int trialnum2, int inputnum, int outputs, int mlpweights, std::unique_ptr<double>& totalloss, int layers, std::unique_ptr<std::vector<int>>& nodestruct, int elmntsinmlp){
 			
-			double dsdw, yval, lp = 1.0;
+			double dsdw, yval, lp = 0.6;
 			int yacpos, yarrpos, dpos, weightpos, istart, dlstrt, jstart, weightstart, weightstart2, deltapoint, deltapoint2, mlpwpoint, weightpoint, yarrpoint, trial;
 			std::vector<double> deltal(elmntsinmlp);
 			
@@ -123,6 +124,10 @@ class AI{
 				
 				pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
 				
+	                        //for(int i = 0; i < (*nodestruct)[0]; ++i){
+				//	std::cout << (*yarr)[i] << std::endl;
+				//}
+
 				for(int num = 0; num < elmntsinmlp; ++num){
 					deltal[num] = 0.0;
 				}
@@ -136,7 +141,7 @@ class AI{
 					yacpos = (trial+1)*outputs-ifin-1;
 					yarrpos = elmntsinmlp-1-ifin;
 					yval = (*yarr)[yarrpos];
-					deltal[yarrpos] = (yval-(*yactualout)[yacpos])*yval*(1-yval); // Assigns deltal to array in spot corresponding to the output node.
+					deltal[yarrpos] = (yval-(*yactualout)[yacpos])*yval*(1.0-yval); // Assigns deltal to array in spot corresponding to the output node.
 				}
 				
 				weightpos = mlpweights; // The position of the weight in question being altered.
@@ -221,7 +226,7 @@ int main(int argc, char **argv){
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-	std::ifstream mlpstruct; mlpstruct.open("mlpstruct.txt"); // Creates a stream and opens the mlpstruct.txt file.
+	std::ifstream mlpstruct; mlpstruct.open("mlpstructd.txt"); // Creates a stream and opens the mlpstruct.txt file.
 	if ( mlpstruct.is_open() ) { // Always check whether the file is open
 		while (mlpstruct.good()){
 			mlpstruct >> value;
@@ -277,8 +282,8 @@ int main(int argc, char **argv){
 //
 //
 
-        fileextract("yinputs.txt", yinputs); //  ((*nodestruct)[0])*trialnum
-        fileextract("yactualout.txt", yactualout); //  ((*nodestruct)[layers-1])*trialnum
+        fileextract("data.txt", yinputs); //  ((*nodestruct)[0])*trialnum
+        fileextract("dataout.txt", yactualout); //  ((*nodestruct)[layers-1])*trialnum
         
 	if ((yinputs->size())%((*nodestruct)[0]) == 0 && (yactualout->size())%((*nodestruct)[layers-1]) == 0){
 
@@ -297,31 +302,47 @@ int main(int argc, char **argv){
 	int inputnum = ((*nodestruct)[0]), outputs = ((*nodestruct)[layers-1]);
 	std::unique_ptr<double> totalloss = std::make_unique<double>();
 
+	std::unique_ptr<double> testloss = std::make_unique<double>();
 //Passes all the inputs through the initial weights and prints out the initial values.
 //
 //
 
-	for(int trial = 0; trial < 4; ++trial){ // Cycles through the datasets.		
-		ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);        
-        }
+	//for(int trial = 0; trial < 4; ++trial){ // Cycles through the datasets.		
+	//	ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);        
+        //}
 
 
 // Training.
 //
 //
-	int TTritpepoch = round((fraction*(yinputs->size()))/epochnum), TTitpepoch = (yinputs->size())-TTritpepoch*epochnum;
+        int noT = (yinputs->size())/((*nodestruct)[0]); // Number of trials
+	int TTritpepoch = round((fraction*noT)/epochnum), TTitpepoch = noT-TTritpepoch*epochnum;
+
+        std::cout << fraction << " " << noT << " " << epochnum << std::endl;	
+        std::cout << "noT: " << noT << " TTritpepoch: " << TTritpepoch << " number of yinputs: " << yinputs->size() << std::endl; 
+
+	std::ofstream losses("losses.txt");
 
         for(int epoch = 0; epoch < epochnum; ++epoch){
 		std::cout << "epoch: " << epoch << std::endl;
+		*totalloss = 0; // To initialize the loss.
 		int trialnum1 = TTritpepoch*epoch, trialnum2 = TTritpepoch*(epoch+1); 
 		ai.training(yarr, mlpwarr, yinputs, yactualout, trialnum1, trialnum2, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
 
-		for(int trial = TTritpepoch*epochnum; trial < yinputs->size(); ++trial){
-			std::cout << "Trial: " << trial << std::endl;
-			ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, totalloss, layers, nodestruct, elmntsinmlp);
+		*totalloss = (*totalloss)/TTritpepoch; // Averages the totalloss from whole training epoch 
+                *testloss = 0;
+		for(int trial = TTritpepoch*epochnum; trial < noT; ++trial){
+			//std::cout << "Trial: " << trial << std::endl;
+			ai.pass1(yarr, mlpwarr, yinputs, yactualout, trial, inputnum, outputs, mlpweights, testloss, layers, nodestruct, elmntsinmlp);
 		}
+		*testloss = (*testloss)/(TTritpepoch);
+
+	        losses << epoch << " " << *totalloss << " " << *testloss << std::endl;	
+
 
 	}
+
+	losses.close();
 // Calculating out the last iteration of yarr for checking.
 //
 //
@@ -331,18 +352,21 @@ int main(int argc, char **argv){
 // Printing all the final weights and yarr.
 //
 //
-        for(int num = 0; num < mlpweights; ++num){
-		std::cout << "mlpwarr: " << (*mlpwarr)[num] << std::endl;
-	}
-        for(int num = 0; num < elmntsinmlp; ++num){
-		std::cout << "yarr: " << (*yarr)[num] << std::endl;
-	}
+       // for(int num = 0; num < mlpweights; ++num){
+	//	std::cout << "mlpwarr: " << (*mlpwarr)[num] << std::endl;
+//	}
+       // for(int num = 0; num < elmntsinmlp; ++num){
+//		std::cout << "yarr: " << (*yarr)[num] << std::endl;
+	//}
+        
+        std::cout << "elmntsinmlp: " << elmntsinmlp << std::endl;
+        std::cout << "mlpweights: " << mlpweights << std::endl;
 
 // Writing the new weights to a file for potential later use.
 //
 //
 	std::ofstream Nweights("Nweights.txt");
-        for(int num = 0; num < elmntsinmlp; ++num){
+        for(int num = 0; num < mlpweights; ++num){
 	        Nweights << (*mlpwarr)[num] << " ";	
 	}
         Nweights.close();
