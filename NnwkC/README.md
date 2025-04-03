@@ -8,7 +8,11 @@ Next compile and run the Mlbp3.cpp file which trains the neural network on the d
 
 This graph shows how the testing and training losses vary as the code progresses for a network of structure: 748, 128, 64, 1 (these are found in the mlpstructd.txt file), you can see that the losses decrease but then increase a bit towards the end.
 
-In this folder there are files; synthetic_one and zero (shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the training by compiling and running the feed.cpp file. This file outputs the output of the neural network for the particular image input to the terminal.
+In this folder there are images; synthetic_one, zero, and generated_zero (shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the training by compiling and running the feed.cpp file. This file outputs the output of the neural network for the particular image input to the terminal.
 
+![synthetic_one](https://github.com/user-attachments/assets/a4a7efa7-4304-45c7-8b5d-d5fdadfa4414)
 ![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
 ![zero_generated](https://github.com/user-attachments/assets/3182a1b7-c419-41b2-8e5e-1f2698ddaebb)
+
+The middle input image has an unexpectedly high value ~0.7-0.8, I tested by using an input image with a zero with a similar style to the training data and it gave a value much closer to zero ~0.001.
+
