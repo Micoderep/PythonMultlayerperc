@@ -1,7 +1,12 @@
 Here is the description of the above code and how to use it:
 
+First the files known as data and dataout.txt are created by running Pyimstofile.py. What this code does is takes the images in mnist_ones and mnist_zeros and pastes them randomly into a row (The randomness is weighted to the dataset which has more data to allow complete spread of the different data when training) in the data.txt file subsequent images are appended on to the end. For each image appened a 0 or a 1 corresponding to an image of a 0 or a 1 is appended to the row in the dataout.txt file.
 
-![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
-
+Next compile and run the Mlbp3.cpp file which trains the neural network on the data in data.txt and the actual outputs in dataout.txt. The training are done in periods called epochs where a portion of the data is trained and the resulting neural network is tested on the whole fraction of the data not allocated to training. Losses are computed for each epoch and are printed to a file called losses.txt and are plotted using the plot.gnu file (The graph is displayed below), in addition the resulting weights are printed in a file called Nweights.txt.
 
 ![Lpfnt](https://github.com/user-attachments/assets/bb01b243-1706-4880-898f-7550d3a9ee94)
+This graph shows how the testing and training losses vary as the code progresses for a network of structure: 748, 128, 64, 1 (these are found in the mlpstructd.txt file), you can see that the losses decrease but then increase a bit towards the end.
+
+In this folder there are files; synthetic_one and zero (Shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the neural network in Nweights.txt.
+
+![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
