@@ -11,3 +11,4 @@ This graph shows how the testing and training losses vary as the code progresses
 In this folder there are files; synthetic_one and zero (shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the training by compiling and running the feed.cpp file. This file outputs the output of the neural network for the particular image input to the terminal.
 
 ![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
+![zero_generated](https://github.com/user-attachments/assets/3182a1b7-c419-41b2-8e5e-1f2698ddaebb)
