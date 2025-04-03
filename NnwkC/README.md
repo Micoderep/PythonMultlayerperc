@@ -1,4 +1,5 @@
 Here is the description of the above code and how to use it:
+(imagedownload1s0s.py downloads the image data if you wanted to see how I got it)
 
 First the files known as data and dataout.txt are created by running Pyimstofile.py. What this code does is takes the images in mnist_ones and mnist_zeros and pastes them randomly into a row (The randomness is weighted to the dataset which has more data to allow complete spread of the different data when training) in the data.txt file subsequent images are appended on to the end. For each image appended, a 0 or a 1 corresponding to an image of a 0 or a 1 is appended to the row in the dataout.txt file.
 
