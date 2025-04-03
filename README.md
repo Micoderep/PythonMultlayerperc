@@ -37,26 +37,8 @@ $$ dl_{i} = \sum_{l=1}^{TNLl}(w_{il}dl_{l})o_{i}(1-o_{i}) $$
 
 In the two equations above the first is the dl calculated for altering the set of weights connecting the penultimate layer to the final layer, subsequent weights are altered using the second equation putting together the previous dl values created.
 
-"Mlbp3.py" is the complete neural network, it takes in:
-
-"mlpstruct.txt" file which contains the structure of the neural network in the format - a b c d.. where a b c d are integers of the number of nodes in a layer.
-
-"yinputs.txt" file which contains all the inputs for all datasets pasted together.
-
-"yactualout.txt" file which contains all the desired outputs for all datasets pasted together in the same file in the same order as the inputs.
-
-"weights.txt" is an optional file which contains all of the weights of the neural network in an order such that in the image above weights are ordered going down in a particular layer then shifting to the top of the next layer. This is optional because I have made available an option of randomly generating the weights.
-
-"Nweights.txt" is the file that the new trained weights go into.
-
-Tests:
+Folders:
 
 dafpy is a folder where I convert the jpeg image "daff1.jpeg" to a row in a txt file using the code in jpegtotxt.py file, the image is also standardized to the size 2048x2048 using the numpy.pad function (this transformation loses the colour information but this is a test of the progress so far). Then the data is used to train the neural network.
 
-Uses of neural network:
-
-Image recognition, and image generation.
-
-What I hope to achieve:
-
-To build fast general neural network software.
+NnwkC is a folder which has a translation of Mlbp.py into C++, there are 1000 images of 28x28 greyscale 1's and 0's in separate folders which are used to train the MLP neural network to distinguish between these two types of images. This training is successful but only with the style of the 1's and 0's as shown within the folder.
