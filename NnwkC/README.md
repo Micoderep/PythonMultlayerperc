@@ -7,6 +7,6 @@ Next compile and run the Mlbp3.cpp file which trains the neural network on the d
 ![Lpfnt](https://github.com/user-attachments/assets/bb01b243-1706-4880-898f-7550d3a9ee94)
 This graph shows how the testing and training losses vary as the code progresses for a network of structure: 748, 128, 64, 1 (these are found in the mlpstructd.txt file), you can see that the losses decrease but then increase a bit towards the end.
 
-In this folder there are files; synthetic_one and zero (Shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the neural network in Nweights.txt.
+In this folder there are files; synthetic_one and zero (Shown below), using jpegtotxt.py these can be turned into row txt files that can be processed by the resultant weights of the training by compiling and running the feed.cpp file.
 
 ![synthetic_zero](https://github.com/user-attachments/assets/6fe8ee39-e9c2-4ceb-a30c-0058a179d791)
